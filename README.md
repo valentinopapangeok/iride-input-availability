@@ -1,4 +1,4 @@
-# IRIDE Input Availability
+# IRIDE input availability S5-02
 
 Daily public dashboard for IRIDE S5 input availability and latency checks across external data providers.
 

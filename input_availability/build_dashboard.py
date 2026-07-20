@@ -231,7 +231,7 @@ def build_site(results_dir: Path, output_dir: Path) -> None:
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>IRIDE Input Availability</title>
+<title>IRIDE input availability S5-02</title>
 <style>
 :root {{ color-scheme: light; --bg:#f6f8fb; --panel:#fff; --text:#172033; --muted:#637083; --ok:#edf8f1; --ok-border:#21a366; --warn:#fff4e5; --warn-border:#d97706; --bad:#fdecec; --bad-border:#dc2626; }}
 body {{ margin:0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background:var(--bg); color:var(--text); }}
@@ -255,7 +255,7 @@ a {{ color:#1d4ed8; }}
 </style>
 </head>
 <body><main>
-<h1>IRIDE Input Availability</h1>
+<h1>IRIDE input availability S5-02</h1>
 <div class="meta">Last audit: <strong>{escape(run_at)}</strong> · Source: <code>{escape(latest_csv.name)}</code> · <a href="latest_input_audit_results.csv">download latest CSV</a> · <a href="latest.json">JSON</a></div>
 {render_status_badges(latest_rows)}
 {render_latest_table(latest_rows)}
