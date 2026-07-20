@@ -229,7 +229,7 @@ def render_weekly_table(rows: list[dict]) -> str:
 
     return f"""
     <h2>Weekly availability</h2>
-    <p class="hint">Previous seven complete UTC days, excluding today. Latest-day evidence is reused; older days are checked search-only where provider APIs support it. ✓ present · × missing · ! provider/query error · ? not checked · — not applicable.</p>
+    <p class="hint">Previous seven complete UTC days, excluding today. Latest-day evidence is reused; older days are checked search-only where provider APIs support it. ✓ present · × missing or newer than latest available · ! provider/query error · ? not checked in weekly search-only mode · — not applicable.</p>
     <table class="weekly-table">
       <thead><tr><th>Product</th><th>Input</th>{head}</tr></thead>
       <tbody>{''.join(body)}</tbody>

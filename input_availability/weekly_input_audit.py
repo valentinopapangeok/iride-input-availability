@@ -18,6 +18,7 @@ import importlib.util
 import json
 import os
 import re
+import shutil
 import sys
 import time
 import urllib.parse
@@ -30,6 +31,14 @@ FIELDS = [
     "run_at_utc", "adapter", "product", "input_name", "date", "status",
     "found", "files_found", "source", "notes",
 ]
+
+WEEKLY_NOT_APPLICABLE_ADAPTERS = {
+    # Monthly products: a daily seven-day availability matrix would be
+    # misleading, even when their latest_date is represented as a full
+    # timestamp rather than YYYY-MM.
+    "cdsapi_cams_ghg",
+    "s5p_pal_ch4",
+}
 
 
 def load_latest_module():
@@ -170,6 +179,107 @@ def gportal_has_day(audit, dataset_path: tuple[str, ...], day: dt.date, params: 
     return ("present" if products else "missing", str(len(products)), "/".join(dataset_path))
 
 
+def cmems_has_day(day: dt.date) -> tuple[str, str, str]:
+    """Check CMEMS file availability for one date without downloading data."""
+    import copernicusmarine
+
+    dataset_id = "SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_a_V2"
+    pattern = f"*{day.strftime('%Y%m%d')}*"
+    response = copernicusmarine.get(
+        dataset_id=dataset_id,
+        filter=pattern,
+        dry_run=True,
+        no_directories=True,
+        disable_progress_bar=True,
+        username=os.environ["CMEMS_USER"],
+        password=os.environ["CMEMS_PASSWORD"],
+    )
+    text = str(response)
+    missing_tokens = ["no file", "0 file", "total size of the download: 0", "files: []"]
+    if any(token in text.lower() for token in missing_tokens):
+        return "missing", "0", f"{dataset_id}; dry_run filter={pattern}"
+    return "present", "1", f"{dataset_id}; dry_run filter={pattern}"
+
+
+def _cds_retrieve_probe(audit, *, dataset: str, request: dict, dest_name: str, url_env: str, key_env: str) -> tuple[str, str, str]:
+    """Run the smallest available CDS/ADS retrieval probe and delete its output."""
+    probe_dir = BASE / "runtime_weekly_probe" / "cds_ads"
+    probe_dir.mkdir(parents=True, exist_ok=True)
+    dest = probe_dir / dest_name
+    if dest.exists():
+        dest.unlink()
+
+    key = os.environ[key_env]
+    url = os.environ[url_env]
+    use_legacy_cdsapi = key.count(":") == 1 and key.split(":", 1)[0].isdigit()
+    if use_legacy_cdsapi:
+        import cdsapi
+        client = cdsapi.Client(url=url, key=key)
+        client.retrieve(dataset, request, str(dest))
+    else:
+        from ecmwf.datastores import Client
+        client = Client(url=url, key=key)
+        request = dict(request)
+        request.pop("format", None)
+        request.setdefault("download_format", "unarchived")
+        client.retrieve(dataset, request, str(dest))
+
+    present = dest.exists() and dest.stat().st_size > 0
+    size = dest.stat().st_size if present else 0
+    try:
+        if dest.exists():
+            dest.unlink()
+    finally:
+        # Clean empty probe folders opportunistically.
+        shutil.rmtree(probe_dir, ignore_errors=True)
+    return ("present" if present else "missing", "1" if present else "0", f"{dataset}; probe bytes={size}")
+
+
+def era5_has_day(audit, day: dt.date, *, land: bool) -> tuple[str, str, str]:
+    dataset = "reanalysis-era5-land" if land else "reanalysis-era5-single-levels"
+    request = {
+        "product_type": "reanalysis",
+        "format": "netcdf",
+        "variable": "skin_temperature",
+        # Tiny point-like box over Italy; this is an availability probe, not a sample.
+        "area": [42.1, 12.4, 41.9, 12.6],
+        "day": [f"{day.day:02d}"],
+        "month": f"{day.month:02d}",
+        "year": str(day.year),
+        "time": "10:00",
+        "data_format": "netcdf",
+    }
+    return _cds_retrieve_probe(
+        audit,
+        dataset=dataset,
+        request=request,
+        dest_name=f"{dataset}_{day.isoformat()}.nc",
+        url_env="CDS_URL",
+        key_env="CDS_KEY",
+    )
+
+
+def cams_aod_has_day(audit, day: dt.date) -> tuple[str, str, str]:
+    request = {
+        "variable": "total_aerosol_optical_depth_550nm",
+        "date": day.isoformat(),
+        "time": "12:00",
+        "leadtime_hour": "0",
+        "type": "forecast",
+        # Tiny box over Italy; enough to validate exact-date retrieval.
+        "area": [42.1, 12.4, 41.9, 12.6],
+        "format": "grib",
+    }
+    return _cds_retrieve_probe(
+        audit,
+        dataset="cams-global-atmospheric-composition-forecasts",
+        request=request,
+        dest_name=f"cams_aod_{day.isoformat()}.grib",
+        url_env="ADS_URL",
+        key_env="ADS_KEY",
+    )
+
+
 def s5p_monthly_has_day(day: dt.date) -> tuple[str, str, str]:
     # Monthly product: a daily weekly matrix is not meaningful. Keep explicit.
     return "not_applicable", "0", "monthly product"
@@ -196,10 +306,10 @@ def checker_for(adapter_name: str):
         "gportal_gcomc_l2_aod": lambda audit, day: gportal_has_day(audit, ("GCOM-C/SGLI", "LEVEL2", "Atmosphere", "L2-ARNP"), day, bbox=list(audit.AOI_ITALY_BBOX)),
         "s5p_pal_ch4": lambda audit, day: s5p_monthly_has_day(day),
         "cdsapi_cams_ghg": lambda audit, day: ("not_applicable", "0", "monthly/retrieval product; weekly search-only not implemented"),
-        "cdsapi_era5_land": lambda audit, day: ("unknown", "0", "CDS retrieval-only check skipped for weekly search-only mode"),
-        "cdsapi_era5": lambda audit, day: ("unknown", "0", "CDS retrieval-only check skipped for weekly search-only mode"),
-        "cdsapi_cams_aod": lambda audit, day: ("unknown", "0", "ADS retrieval-only check skipped for weekly search-only mode"),
-        "copernicusmarine_cmems": lambda audit, day: ("unknown", "0", "CMEMS exact-date search-only check not implemented"),
+        "cdsapi_era5_land": lambda audit, day: era5_has_day(audit, day, land=True),
+        "cdsapi_era5": lambda audit, day: era5_has_day(audit, day, land=False),
+        "cdsapi_cams_aod": lambda audit, day: cams_aod_has_day(audit, day),
+        "copernicusmarine_cmems": lambda audit, day: cmems_has_day(day),
     }.get(adapter_name)
 
 
@@ -217,7 +327,7 @@ def weekly_rows(latest_rows: list[dict], run_at: str) -> list[dict]:
             files = "0"
             source = "weekly_probe"
             notes = ""
-            if monthly:
+            if monthly or adapter in WEEKLY_NOT_APPLICABLE_ADAPTERS:
                 status, files, notes = "not_applicable", "0", "monthly product"
                 source = "classification"
             elif latest_day and day > latest_day:
