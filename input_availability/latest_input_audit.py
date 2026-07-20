@@ -603,11 +603,20 @@ def run_cmems_med_sst(adapter: Adapter) -> dict:
     return {"status": "no_data_found", "latest_date": "", "files_found": "0", "downloaded_file": "", "notes": "searched last 10 days"}
 
 
+
+def earthaccess_login_from_env():
+    """Authenticate earthaccess for sample downloads when Earthdata creds exist."""
+    if not env_present("EARTHDATA_USER", "EARTHDATA_PASSWORD"):
+        return False
+    import earthaccess
+    os.environ["EARTHDATA_USERNAME"] = os.environ["EARTHDATA_USER"]
+    os.environ["EARTHDATA_PASSWORD"] = os.environ["EARTHDATA_PASSWORD"]
+    earthaccess.login(strategy="environment", persist=False)
+    return True
+
 def run_viirs_snow(adapter: Adapter) -> dict:
     import earthaccess
-    os.environ['EARTHDATA_USERNAME'] = os.environ['EARTHDATA_USER']
-    os.environ['EARTHDATA_PASSWORD'] = os.environ['EARTHDATA_PASSWORD']
-    earthaccess.login(strategy='environment', persist=False)
+    earthaccess_login_from_env()
     bbox = AOI_ITALY_BBOX
     for day in latest_day_candidates(14):
         start = day.isoformat()
@@ -636,9 +645,11 @@ def run_modis_latest(adapter: Adapter, short_name: str, version: str, notes: str
             dest_dir = DOWNLOADS / "earthaccess" / adapter.name
             dest_dir.mkdir(parents=True, exist_ok=True)
             try:
+                if not earthaccess_login_from_env():
+                    raise RuntimeError("missing Earthdata credentials for sample download")
                 search_kwargs = {"short_name": short_name, "count": 1, "version": version}
                 search_kwargs["temporal"] = (day.isoformat(), (day + dt.timedelta(days=1)).isoformat())
-                search_kwargs["bounding_box"] = list(AOI_ITALY_BBOX)
+                search_kwargs["bounding_box"] = AOI_ITALY_BBOX
                 results = earthaccess.search_data(**search_kwargs)
                 if results:
                     downloaded = earthaccess.download(results[:1], local_path=dest_dir, show_progress=False)
@@ -792,6 +803,8 @@ def run_cmr_latest(adapter: Adapter, short_name: str, version: str | None = None
     status = "found"
     if download_sample:
         try:
+            if not earthaccess_login_from_env():
+                raise RuntimeError("missing Earthdata credentials for sample download")
             search_kwargs = {"short_name": short_name, "count": 1}
             if version:
                 search_kwargs["version"] = version
@@ -802,7 +815,9 @@ def run_cmr_latest(adapter: Adapter, short_name: str, version: str | None = None
                     search_kwargs["temporal"] = (month_start.isoformat(), month_end.isoformat())
                 else:
                     search_kwargs["temporal"] = (latest, latest)
-            search_kwargs["bounding_box"] = list(AOI_ITALY_BBOX)
+            # Match the CMR latest-granule search above. These generic CMR
+            # inputs are not AOI-filtered there, so adding a bbox here can make
+            # sample download incorrectly disappear even when availability exists.
             results = earthaccess.search_data(**search_kwargs)
             if results:
                 dest_dir = DOWNLOADS / "earthaccess" / adapter.name
