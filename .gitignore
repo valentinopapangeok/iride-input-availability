@@ -226,3 +226,6 @@ input_availability/site/
 *.nc4
 *.h5
 *.zip
+
+# IDE local settings
+.idea/
