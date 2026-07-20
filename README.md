@@ -66,3 +66,14 @@ Do not commit:
 - `input_availability/runtime_downloads/`
 - `input_availability/audit_results/`
 - provider data files such as GRIB/NetCDF/HDF
+
+## Bulk upload repository secrets
+
+If you have the private local audit `config.json`, repository secrets can be uploaded with:
+
+```bash
+python scripts/set_github_secrets_from_config.py --dry-run
+python scripts/set_github_secrets_from_config.py
+```
+
+The script requires the GitHub CLI (`gh`) to be installed and authenticated. It prints only secret names, never values.
