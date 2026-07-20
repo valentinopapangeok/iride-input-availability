@@ -3,8 +3,8 @@ name: Input availability dashboard
 on:
   workflow_dispatch:
   schedule:
-    # Daily at 07:15 UTC = 09:15 Europe/Rome during summer time.
-    - cron: "15 7 * * *"
+    # Temporary test schedule: daily at 10:00 UTC = 12:00 Europe/Rome during summer time.
+    - cron: "0 10 * * *"
 
 permissions:
   contents: read
