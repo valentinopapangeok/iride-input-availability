@@ -1,0 +1,13 @@
+cdsapi>=0.7.7
+ecmwf-datastores-client>=0.5.1
+copernicusmarine
+earthaccess
+modis-tools
+eumdac
+gportal==0.4.0
+pystac-client
+requests
+urllib3
+cfgrib
+eccodes
+rasterio

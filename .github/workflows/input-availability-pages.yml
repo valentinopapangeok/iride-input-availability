@@ -1,0 +1,95 @@
+name: Input availability dashboard
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Daily at 07:15 UTC = 09:15 Europe/Rome during summer time.
+    - cron: "15 7 * * *"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: input-availability-pages
+  cancel-in-progress: false
+
+env:
+  ADS_URL: https://ads.atmosphere.copernicus.eu/api
+  ADS_KEY: ${{ secrets.ADS_KEY }}
+  CDS_URL: https://cds.climate.copernicus.eu/api
+  CDS_KEY: ${{ secrets.CDS_KEY }}
+  CMEMS_USER: ${{ secrets.CMEMS_USER }}
+  CMEMS_PASSWORD: ${{ secrets.CMEMS_PASSWORD }}
+  EARTHDATA_USER: ${{ secrets.EARTHDATA_USER }}
+  EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+  CDSE_USER: ${{ secrets.CDSE_USER }}
+  CDSE_PASSWORD: ${{ secrets.CDSE_PASSWORD }}
+  EUMETSAT_CONSUMER_KEY: ${{ secrets.EUMETSAT_CONSUMER_KEY }}
+  EUMETSAT_CONSUMER_SECRET: ${{ secrets.EUMETSAT_CONSUMER_SECRET }}
+  GPORTAL_USER: ${{ secrets.GPORTAL_USER }}
+  GPORTAL_PASSWORD: ${{ secrets.GPORTAL_PASSWORD }}
+  METEOHUB_BASE_URL: https://meteohub.agenziaitaliameteo.it
+  METEOHUB_RADAR_DATASET: radar_sri_dpc
+  METEOHUB_MAX_DOWNLOAD_MB: "100"
+  METEOHUB_USER: ${{ secrets.METEOHUB_USER }}
+  METEOHUB_PASSWORD: ${{ secrets.METEOHUB_PASSWORD }}
+  METEOHUB_ARCO_ACCESS_KEY: ${{ secrets.METEOHUB_ARCO_ACCESS_KEY }}
+
+jobs:
+  audit-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Restore historical audit results
+        uses: actions/cache@v4
+        with:
+          path: input_availability/audit_results
+          key: input-availability-audit-results-${{ github.run_id }}
+          restore-keys: |
+            input-availability-audit-results-
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Install system libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libeccodes0 libeccodes-dev
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Run input availability audit
+        run: python input_availability/latest_input_audit.py
+
+      - name: Build static dashboard
+        run: python input_availability/build_dashboard.py --output-dir site
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: audit-and-build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

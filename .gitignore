@@ -216,3 +216,13 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+# IRIDE input availability local/generated data
+input_availability/config.json
+input_availability/runtime_downloads/
+input_availability/audit_results/
+input_availability/site/
+*.grib
+*.nc
+*.nc4
+*.h5
+*.zip
