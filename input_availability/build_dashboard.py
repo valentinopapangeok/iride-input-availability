@@ -76,6 +76,14 @@ def discover_latest_per_day(results_dir: Path) -> list[Path]:
     return [latest_by_day[key] for key in sorted(latest_by_day)]
 
 
+def discover_latest_weekly_csv(results_dir: Path) -> Path | None:
+    paths = sorted(
+        results_dir.glob("**/weekly_input_availability_*.csv"),
+        key=lambda path: path.stat().st_mtime,
+    )
+    return paths[-1] if paths else None
+
+
 def read_rows(path: Path) -> list[dict]:
     with path.open(newline="") as handle:
         return list(csv.DictReader(handle))
@@ -184,6 +192,51 @@ def render_latest_table(rows: list[dict]) -> str:
     """ + "\n".join(body) + "</tbody></table>"
 
 
+def render_weekly_table(rows: list[dict]) -> str:
+    if not rows:
+        return ""
+    dates = sorted({row.get("date", "") for row in rows if row.get("date")})
+    grouped: dict[tuple[str, str, str], dict[str, dict]] = defaultdict(dict)
+    for row in rows:
+        grouped[
+            (row.get("product", ""), row.get("input_name", ""), row.get("adapter", ""))
+        ][row.get("date", "")] = row
+
+    labels = {
+        "present": "✓",
+        "missing": "×",
+        "error": "!",
+        "unknown": "?",
+        "not_applicable": "—",
+    }
+
+    def cell(row: dict | None) -> str:
+        if row is None:
+            return '<td class="weekly unknown" title="not checked">?</td>'
+        status = row.get("status", "unknown")
+        notes = escape(row.get("notes", ""))
+        files = escape(row.get("files_found", "0"))
+        return (
+            f'<td class="weekly {escape(status)}" '
+            f'title="{notes}; files={files}">{labels.get(status, "?")}</td>'
+        )
+
+    head = "".join(f"<th>{escape(day[5:])}</th>" for day in dates)
+    body = []
+    for product, input_name, adapter in sorted(grouped):
+        cells = "".join(cell(grouped[(product, input_name, adapter)].get(day)) for day in dates)
+        body.append(f"<tr><td>{escape(product)}</td><td>{escape(input_name)}</td>{cells}</tr>")
+
+    return f"""
+    <h2>Weekly availability</h2>
+    <p class="hint">Previous seven complete UTC days, excluding today. Latest-day evidence is reused; older days are checked search-only where provider APIs support it. ✓ present · × missing · ! provider/query error · ? not checked · — not applicable.</p>
+    <table class="weekly-table">
+      <thead><tr><th>Product</th><th>Input</th>{head}</tr></thead>
+      <tbody>{''.join(body)}</tbody>
+    </table>
+    """
+
+
 def render_latency_table(rows: list[dict]) -> str:
     body = []
     for row in rows:
@@ -217,12 +270,18 @@ def build_site(results_dir: Path, output_dir: Path) -> None:
     latest_rows = read_rows(latest_csv)
     run_at = latest_rows[0].get("run_at_utc", "unknown") if latest_rows else "unknown"
     latency_rows = summarize_history(csv_paths, latest_rows)
+    weekly_csv = discover_latest_weekly_csv(results_dir)
+    weekly_rows = read_rows(weekly_csv) if weekly_csv else []
 
     shutil.copy2(latest_csv, output_dir / "latest_input_audit_results.csv")
+    if weekly_csv:
+        shutil.copy2(weekly_csv, output_dir / "weekly_input_availability.csv")
     (output_dir / "latest.json").write_text(json.dumps({
         "run_at_utc": run_at,
         "source_csv": str(latest_csv),
         "latest": latest_rows,
+        "weekly_source_csv": str(weekly_csv) if weekly_csv else "",
+        "weekly": weekly_rows,
         "latency_summary": latency_rows,
     }, indent=2))
 
@@ -250,6 +309,13 @@ th {{ background:#eaf0f7; color:#334155; font-weight:650; }}
 tr.ok td:first-child {{ border-left:5px solid var(--ok-border); }}
 tr.warn {{ background:var(--warn); }} tr.warn td:first-child {{ border-left:5px solid var(--warn-border); }}
 tr.bad {{ background:var(--bad); }} tr.bad td:first-child {{ border-left:5px solid var(--bad-border); }}
+.hint {{ color:var(--muted); font-size:14px; margin-top:-8px; }}
+td.weekly {{ text-align:center; font-weight:800; font-size:16px; }}
+td.weekly.present {{ background:var(--ok); color:#15803d; }}
+td.weekly.missing {{ background:var(--bad); color:#b91c1c; }}
+td.weekly.error {{ background:var(--warn); color:#b45309; }}
+td.weekly.unknown {{ background:#f1f5f9; color:#64748b; }}
+td.weekly.not_applicable {{ background:#f8fafc; color:#94a3b8; }}
 a {{ color:#1d4ed8; }}
 .footer {{ margin-top:28px; color:var(--muted); font-size:13px; }}
 </style>
@@ -259,6 +325,7 @@ a {{ color:#1d4ed8; }}
 <div class="meta">Last audit: <strong>{escape(run_at)}</strong> · Source: <code>{escape(latest_csv.name)}</code> · <a href="latest_input_audit_results.csv">download latest CSV</a> · <a href="latest.json">JSON</a></div>
 {render_status_badges(latest_rows)}
 {render_latest_table(latest_rows)}
+{render_weekly_table(weekly_rows)}
 {render_latency_table(latency_rows)}
 <div class="footer">Generated automatically by GitHub Actions. Credentials and downloaded samples are not published.</div>
 </main></body></html>

@@ -76,6 +76,9 @@ jobs:
       - name: Run input availability audit
         run: python input_availability/latest_input_audit.py
 
+      - name: Run weekly search-only availability audit
+        run: python input_availability/weekly_input_audit.py
+
       - name: Build static dashboard
         run: python input_availability/build_dashboard.py --output-dir site
 
