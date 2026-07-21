@@ -192,7 +192,8 @@ def render_latest_table(rows: list[dict]) -> str:
     """ + "\n".join(body) + "</tbody></table>"
 
 
-def render_weekly_table(rows: list[dict]) -> str:
+def render_availability_matrix(rows: list[dict], *, cadence: str, title: str, description: str) -> str:
+    rows = [row for row in rows if row.get("cadence", "daily") == cadence]
     if not rows:
         return ""
     dates = sorted({row.get("date", "") for row in rows if row.get("date")})
@@ -221,20 +222,43 @@ def render_weekly_table(rows: list[dict]) -> str:
             f'title="{notes}; files={files}">{labels.get(status, "?")}</td>'
         )
 
-    head = "".join(f"<th>{escape(day[5:])}</th>" for day in dates)
+    def header_label(value: str) -> str:
+        if cadence == "monthly":
+            return value[2:] if re.fullmatch(r"\d{4}-\d{2}", value) else value
+        return value[5:] if re.fullmatch(r"\d{4}-\d{2}-\d{2}", value) else value
+
+    head = "".join(f"<th>{escape(header_label(day))}</th>" for day in dates)
     body = []
     for product, input_name, adapter in sorted(grouped):
         cells = "".join(cell(grouped[(product, input_name, adapter)].get(day)) for day in dates)
         body.append(f"<tr><td>{escape(product)}</td><td>{escape(input_name)}</td>{cells}</tr>")
 
     return f"""
-    <h2>Weekly availability</h2>
-    <p class="hint">Previous seven complete UTC days, excluding today. Latest-day evidence is reused; older days are checked search-only where provider APIs support it. ✓ present · × missing or newer than latest available · ! provider/query error · ? not checked in weekly search-only mode · — not applicable.</p>
+    <h2>{escape(title)}</h2>
+    <p class="hint">{escape(description)} Latest evidence is reused; older periods are checked search-only or with tiny provider probes where required. ✓ present · × missing or newer than latest available · ! provider/query error · ? not checked.</p>
     <table class="weekly-table">
       <thead><tr><th>Product</th><th>Input</th>{head}</tr></thead>
       <tbody>{''.join(body)}</tbody>
     </table>
     """
+
+
+def render_weekly_table(rows: list[dict]) -> str:
+    return render_availability_matrix(
+        rows,
+        cadence="daily",
+        title="Weekly availability",
+        description="Daily products over the previous seven complete UTC days, excluding today.",
+    )
+
+
+def render_semestral_table(rows: list[dict]) -> str:
+    return render_availability_matrix(
+        rows,
+        cadence="monthly",
+        title="Semestral availability",
+        description="Monthly products over the latest six calendar months.",
+    )
 
 
 def render_latency_table(rows: list[dict]) -> str:
@@ -326,6 +350,7 @@ a {{ color:#1d4ed8; }}
 {render_status_badges(latest_rows)}
 {render_latest_table(latest_rows)}
 {render_weekly_table(weekly_rows)}
+{render_semestral_table(weekly_rows)}
 {render_latency_table(latency_rows)}
 <div class="footer">Generated automatically by GitHub Actions. Credentials and downloaded samples are not published.</div>
 </main></body></html>
