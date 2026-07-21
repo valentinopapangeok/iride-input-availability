@@ -220,7 +220,7 @@ def cmems_has_day(day: dt.date) -> tuple[str, str, str]:
     return "present", "1", f"{dataset_id}; dry_run filter={pattern}"
 
 
-def _cds_retrieve_probe(audit, *, dataset: str, request: dict, dest_name: str, url_env: str, key_env: str) -> tuple[str, str, str]:
+def _cds_retrieve_probe(audit, *, dataset: str, request: dict, dest_name: str, url_env: str, key_env: str, add_download_format: bool = True) -> tuple[str, str, str]:
     """Run the smallest available CDS/ADS retrieval probe and delete its output."""
     probe_dir = BASE / "runtime_weekly_probe" / "cds_ads"
     probe_dir.mkdir(parents=True, exist_ok=True)
@@ -240,7 +240,8 @@ def _cds_retrieve_probe(audit, *, dataset: str, request: dict, dest_name: str, u
         client = Client(url=url, key=key)
         request = dict(request)
         request.pop("format", None)
-        request.setdefault("download_format", "unarchived")
+        if add_download_format:
+            request.setdefault("download_format", "unarchived")
         client.retrieve(dataset, request, str(dest))
 
     present = dest.exists() and dest.stat().st_size > 0
@@ -315,6 +316,7 @@ def cams_ghg_has_month(audit, month_start: dt.date) -> tuple[str, str, str]:
         dest_name=f"cams_ghg_{month_start.strftime('%Y_%m')}.zip",
         url_env="ADS_URL",
         key_env="ADS_KEY",
+        add_download_format=False,
     )
 
 
@@ -446,7 +448,7 @@ def daily_rows(latest_rows: list[dict], run_at: str, audit) -> list[dict]:
 
 
 def monthly_rows(latest_rows: list[dict], run_at: str, audit) -> list[dict]:
-    months = recent_months(7)
+    months = recent_months(6)
     rows: list[dict] = []
     for latest in latest_rows:
         adapter = latest.get("adapter", "")
