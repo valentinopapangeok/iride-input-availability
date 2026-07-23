@@ -618,17 +618,29 @@ def run_viirs_snow(adapter: Adapter) -> dict:
     import earthaccess
     earthaccess_login_from_env()
     bbox = AOI_ITALY_BBOX
-    for day in latest_day_candidates(14):
-        start = day.isoformat()
-        end = (day + dt.timedelta(days=1)).isoformat()
-        results = earthaccess.search_data(short_name='VNP10A1F', temporal=(start, end), bounding_box=bbox)
-        if results:
-            dest_dir = DOWNLOADS / "earthaccess" / adapter.name
-            dest_dir.mkdir(parents=True, exist_ok=True)
-            downloaded = earthaccess.download(results[:1], local_path=dest_dir, show_progress=False)
-            downloaded_file = str(downloaded[0]) if downloaded else ""
-            return {"status": "downloaded" if downloaded_file else "found", "latest_date": day.isoformat(), "files_found": str(len(results)), "downloaded_file": downloaded_file, "notes": "VNP10A1F"}
-    return {"status": "no_data_found", "latest_date": "", "files_found": "0", "downloaded_file": "", "notes": "searched last 14 days"}
+    # Suomi-NPP VNP10A1F became stale in July 2026 for this AOI.
+    # Prefer the active JPSS successors, retaining VNP10A1F only as a legacy fallback.
+    active_short_names = ("VJ110A1F", "VJ210A1F")
+    legacy_short_names = ("VNP10A1F",)
+    for short_names, label in ((active_short_names, "JPSS successors"), (legacy_short_names, "legacy Suomi-NPP fallback")):
+        for day in latest_day_candidates(14):
+            start = day.isoformat()
+            end = (day + dt.timedelta(days=1)).isoformat()
+            for short_name in short_names:
+                results = earthaccess.search_data(short_name=short_name, temporal=(start, end), bounding_box=bbox)
+                if results:
+                    dest_dir = DOWNLOADS / "earthaccess" / adapter.name
+                    dest_dir.mkdir(parents=True, exist_ok=True)
+                    downloaded = earthaccess.download(results[:1], local_path=dest_dir, show_progress=False)
+                    downloaded_file = str(downloaded[0]) if downloaded else ""
+                    return {
+                        "status": "downloaded" if downloaded_file else "found",
+                        "latest_date": day.isoformat(),
+                        "files_found": str(len(results)),
+                        "downloaded_file": downloaded_file,
+                        "notes": f"{short_name} ({label}); legacy VNP10A1F checked only as fallback",
+                    }
+    return {"status": "no_data_found", "latest_date": "", "files_found": "0", "downloaded_file": "", "notes": "searched last 14 days across VJ110A1F/VJ210A1F and legacy VNP10A1F"}
 
 
 def run_modis_latest(adapter: Adapter, short_name: str, version: str, notes: str) -> dict:

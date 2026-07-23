@@ -133,7 +133,7 @@ def cdse_has_day(audit, day: dt.date, product_type: str, contains_name: str | No
     return ("present" if vals else "missing", str(len(vals)), vals[0].get("Name", "") if vals else "")
 
 
-def cmr_has_day(short_name: str, day: dt.date, version: str | None = None) -> tuple[str, str, str]:
+def cmr_has_day(short_name: str, day: dt.date, version: str | None = None, bounding_box: tuple[float, float, float, float] | None = None) -> tuple[str, str, str]:
     import requests
     params = {
         "short_name": short_name,
@@ -143,11 +143,23 @@ def cmr_has_day(short_name: str, day: dt.date, version: str | None = None) -> tu
     }
     if version:
         params["version"] = version
+    if bounding_box:
+        params["bounding_box"] = ",".join(str(value) for value in bounding_box)
     response = requests.get("https://cmr.earthdata.nasa.gov/search/granules.json", params=params, timeout=60, verify=False)
     response.raise_for_status()
     entries = response.json().get("feed", {}).get("entry", [])
     title = entries[0].get("producer_granule_id") or entries[0].get("title", "") if entries else ""
     return ("present" if entries else "missing", str(len(entries)), title)
+
+
+def cmr_has_any_day(short_names: tuple[str, ...], day: dt.date, bounding_box: tuple[float, float, float, float] | None = None) -> tuple[str, str, str]:
+    checked: list[str] = []
+    for short_name in short_names:
+        status, count, note = cmr_has_day(short_name, day, bounding_box=bounding_box)
+        checked.append(short_name)
+        if status == "present":
+            return status, count, f"{short_name}: {note}"
+    return "missing", "0", f"checked {','.join(checked)}"
 
 
 def modis_has_day(audit, short_name: str, version: str, day: dt.date) -> tuple[str, str, str]:
@@ -383,7 +395,7 @@ def checker_for(adapter_name: str):
         "earthdata_modis_lst": lambda audit, day: modis_has_day(audit, "MOD11A1", "061", day),
         "earthdata_modis_aod": lambda audit, day: modis_has_day(audit, "MCD19A2", "061", day),
         "podaac_viirs_sst": lambda audit, day: cmr_has_day("VIIRS_NPP-STAR-L2P-v2.80", day),
-        "earthaccess_viirs_snow": lambda audit, day: cmr_has_day("VNP10A1F", day),
+        "earthaccess_viirs_snow": lambda audit, day: cmr_has_any_day(("VJ110A1F", "VJ210A1F", "VNP10A1F"), day, bounding_box=audit.AOI_ITALY_BBOX),
         "cmr_oco2": lambda audit, day: cmr_has_day("OCO2_L2_Lite_FP", day, "11.2r"),
         "cmr_oco3": lambda audit, day: cmr_has_day("OCO3_L2_Lite_FP", day, "11r"),
         "eumdac_sarah3_dni": lambda audit, day: eumdac_has_day("EO:EUM:DAT:0863", day, product_filter=lambda p: str(p).startswith("DNIin")),
