@@ -395,7 +395,7 @@ def checker_for(adapter_name: str):
         "earthdata_modis_lst": lambda audit, day: modis_has_day(audit, "MOD11A1", "061", day),
         "earthdata_modis_aod": lambda audit, day: modis_has_day(audit, "MCD19A2", "061", day),
         "podaac_viirs_sst": lambda audit, day: cmr_has_day("VIIRS_NPP-STAR-L2P-v2.80", day),
-        "earthaccess_viirs_snow": lambda audit, day: cmr_has_any_day(("VJ110A1F", "VJ210A1F", "VNP10A1F"), day, bounding_box=audit.AOI_ITALY_BBOX),
+        "earthaccess_viirs_snow": lambda audit, day: cmr_has_day("VNP10A1F", day, bounding_box=audit.AOI_ITALY_BBOX),
         "cmr_oco2": lambda audit, day: cmr_has_day("OCO2_L2_Lite_FP", day, "11.2r"),
         "cmr_oco3": lambda audit, day: cmr_has_day("OCO3_L2_Lite_FP", day, "11r"),
         "eumdac_sarah3_dni": lambda audit, day: eumdac_has_day("EO:EUM:DAT:0863", day, product_filter=lambda p: str(p).startswith("DNIin")),
