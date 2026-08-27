@@ -756,6 +756,21 @@ def run_s5p_pal_ch4(adapter: Adapter) -> dict:
     }
 
 
+def run_s5p_eumetsat_ch4(adapter: Adapter) -> dict:
+    """Check the operational EUMETSAT Sentinel-5P/TROPOMI CH4 stream.
+
+    S5P-PAL remains the quality/reference CH4 input monitored for Product 07.
+    This companion adapter tracks the operational provider route now exposed by
+    EUMETSAT Data Store.
+    """
+    return run_eumdac_latest(
+        adapter,
+        "EO:EUM:DAT:1101",
+        download_sample=True,
+        search_days=14,
+    )
+
+
 def run_cmr_latest(adapter: Adapter, short_name: str, version: str | None = None, download_sample: bool = False) -> dict:
     import requests
     import earthaccess
@@ -839,11 +854,19 @@ def run_cmr_latest(adapter: Adapter, short_name: str, version: str | None = None
 
 
 def run_oco2(adapter: Adapter) -> dict:
-    return run_cmr_latest(adapter, "OCO2_L2_Lite_FP", "11.2r", download_sample=True)
+    return run_cmr_latest(adapter, "OCO2_L2_Lite_FP", "11.3r", download_sample=True)
 
 
 def run_oco3(adapter: Adapter) -> dict:
     return run_cmr_latest(adapter, "OCO3_L2_Lite_FP", "11r", download_sample=True)
+
+
+def run_oco2_forward(adapter: Adapter) -> dict:
+    return run_cmr_latest(adapter, "OCO2_L2_Fwd_FP", "11.3", download_sample=True)
+
+
+def run_oco3_forward(adapter: Adapter) -> dict:
+    return run_cmr_latest(adapter, "OCO3_L2_Fwd_FP", "11", download_sample=True)
 
 
 def run_viirs_sst(adapter: Adapter) -> dict:
@@ -1085,8 +1108,11 @@ ADAPTERS = [
     Adapter("eumdac_mtg_cloudmask", "06", "MTG Cloud Mask", ("EUMETSAT_CONSUMER_KEY", "EUMETSAT_CONSUMER_SECRET"), run_mtg_cloudmask),
     Adapter("cdsapi_cams_ghg", "07/08", "CAMS GHG", ("ADS_URL", "ADS_KEY"), run_cams_ghg),
     Adapter("s5p_pal_ch4", "07", "S5P-PAL CH4", (), run_s5p_pal_ch4),
+    Adapter("s5p_eumetsat_ch4", "07", "S5P EUMETSAT CH4", ("EUMETSAT_CONSUMER_KEY", "EUMETSAT_CONSUMER_SECRET"), run_s5p_eumetsat_ch4),
     Adapter("cmr_oco2", "08", "OCO-2", (), run_oco2),
     Adapter("cmr_oco3", "08", "OCO-3", (), run_oco3),
+    Adapter("cmr_oco2_forward", "08", "OCO-2 Forward", (), run_oco2_forward),
+    Adapter("cmr_oco3_forward", "08", "OCO-3 Forward", (), run_oco3_forward),
     Adapter("cdsapi_cams_aod", "09", "CAMS atmospheric composition forecast", ("ADS_URL", "ADS_KEY"), run_cams_aod),
     Adapter("cdse_sentinel3_synergy_aod", "09", "Sentinel-3 SYNERGY AOD", (), run_s3_synergy_aod),
     Adapter("gportal_gcomc_l2_aod", "09", "GCOM-C SGLI L2 Atmosphere ARNP", ("GPORTAL_USER", "GPORTAL_PASSWORD"), run_gportal_gcomc_l2_aod),

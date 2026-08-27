@@ -37,8 +37,11 @@ MONTHLY_ADAPTERS = {
     # Products 07/08 are monthly or month-scoped for dashboard purposes.
     "cdsapi_cams_ghg",
     "s5p_pal_ch4",
+    "s5p_eumetsat_ch4",
     "cmr_oco2",
     "cmr_oco3",
+    "cmr_oco2_forward",
+    "cmr_oco3_forward",
 }
 
 
@@ -182,6 +185,27 @@ def eumdac_has_day(collection_id: str, day: dt.date, product_filter: Callable[[o
     if product_filter:
         products = [p for p in products if product_filter(p)]
     return ("present" if products else "missing", str(len(products)), f"{collection_id} | {collection.title}")
+
+
+def eumdac_has_month(collection_id: str, month_start: dt.date, product_filter: Callable[[object], bool] | None = None) -> tuple[str, str, str]:
+    import eumdac
+    token = eumdac.AccessToken((os.environ["EUMETSAT_CONSUMER_KEY"], os.environ["EUMETSAT_CONSUMER_SECRET"]))
+    collection = eumdac.DataStore(token).get_collection(collection_id)
+    month_end = end_of_month(month_start)
+    today = dt.datetime.now(dt.timezone.utc).date()
+    if month_start.year == today.year and month_start.month == today.month:
+        probe_day = max(month_start, today - dt.timedelta(days=2))
+    else:
+        probe_day = min(month_start + dt.timedelta(days=14), month_end)
+    start = dt.datetime.combine(probe_day, dt.time.min, tzinfo=dt.timezone.utc)
+    end = min(
+        dt.datetime.combine(probe_day + dt.timedelta(days=1), dt.time.min, tzinfo=dt.timezone.utc),
+        dt.datetime.combine(month_end, dt.time.max, tzinfo=dt.timezone.utc),
+    )
+    products = list(collection.search(dtstart=start, dtend=end))
+    if product_filter:
+        products = [p for p in products if product_filter(p)]
+    return ("present" if products else "missing", str(len(products)), f"{collection_id} | {collection.title} | probe={probe_day.isoformat()}")
 
 
 def meteohub_has_day(audit, day: dt.date) -> tuple[str, str, str]:
@@ -381,8 +405,11 @@ def monthly_checker_for(adapter_name: str):
     return {
         "cdsapi_cams_ghg": lambda audit, month_start: cams_ghg_has_month(audit, month_start),
         "s5p_pal_ch4": lambda audit, month_start: s5p_pal_ch4_has_month(month_start),
-        "cmr_oco2": lambda audit, month_start: cmr_has_month("OCO2_L2_Lite_FP", month_start, "11.2r"),
+        "s5p_eumetsat_ch4": lambda audit, month_start: eumdac_has_month("EO:EUM:DAT:1101", month_start),
+        "cmr_oco2": lambda audit, month_start: cmr_has_month("OCO2_L2_Lite_FP", month_start, "11.3r"),
         "cmr_oco3": lambda audit, month_start: cmr_has_month("OCO3_L2_Lite_FP", month_start, "11r"),
+        "cmr_oco2_forward": lambda audit, month_start: cmr_has_month("OCO2_L2_Fwd_FP", month_start, "11.3"),
+        "cmr_oco3_forward": lambda audit, month_start: cmr_has_month("OCO3_L2_Fwd_FP", month_start, "11"),
     }.get(adapter_name)
 
 
@@ -396,8 +423,10 @@ def checker_for(adapter_name: str):
         "earthdata_modis_aod": lambda audit, day: modis_has_day(audit, "MCD19A2", "061", day),
         "podaac_viirs_sst": lambda audit, day: cmr_has_day("VIIRS_NPP-STAR-L2P-v2.80", day),
         "earthaccess_viirs_snow": lambda audit, day: cmr_has_day("VNP10A1F", day, bounding_box=audit.AOI_ITALY_BBOX),
-        "cmr_oco2": lambda audit, day: cmr_has_day("OCO2_L2_Lite_FP", day, "11.2r"),
+        "cmr_oco2": lambda audit, day: cmr_has_day("OCO2_L2_Lite_FP", day, "11.3r"),
         "cmr_oco3": lambda audit, day: cmr_has_day("OCO3_L2_Lite_FP", day, "11r"),
+        "cmr_oco2_forward": lambda audit, day: cmr_has_day("OCO2_L2_Fwd_FP", day, "11.3"),
+        "cmr_oco3_forward": lambda audit, day: cmr_has_day("OCO3_L2_Fwd_FP", day, "11"),
         "eumdac_sarah3_dni": lambda audit, day: eumdac_has_day("EO:EUM:DAT:0863", day, product_filter=lambda p: str(p).startswith("DNIin")),
         "hsaf_h40": lambda audit, day: eumdac_has_day("EO:EUM:DAT:1086", day),
         "eumdac_mtg_cloudmask": lambda audit, day: eumdac_has_day("EO:EUM:DAT:0800", day),
@@ -406,6 +435,7 @@ def checker_for(adapter_name: str):
         "gportal_gcomc_l3_sst": lambda audit, day: gportal_has_day(audit, ("GCOM-C/SGLI", "LEVEL3", "Oceanic sphere", "L3-SST"), day),
         "gportal_gcomc_l2_aod": lambda audit, day: gportal_has_day(audit, ("GCOM-C/SGLI", "LEVEL2", "Atmosphere", "L2-ARNP"), day, bbox=list(audit.AOI_ITALY_BBOX)),
         "s5p_pal_ch4": lambda audit, day: ("not_applicable", "0", "monthly product"),
+        "s5p_eumetsat_ch4": lambda audit, day: ("not_applicable", "0", "monthly product companion"),
         "cdsapi_cams_ghg": lambda audit, day: ("not_applicable", "0", "monthly product"),
         "cdsapi_era5_land": lambda audit, day: era5_has_day(audit, day, land=True),
         "cdsapi_era5": lambda audit, day: era5_has_day(audit, day, land=False),
