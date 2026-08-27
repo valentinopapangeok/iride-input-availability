@@ -37,7 +37,6 @@ MONTHLY_ADAPTERS = {
     # Products 07/08 are monthly or month-scoped for dashboard purposes.
     "cdsapi_cams_ghg",
     "s5p_pal_ch4",
-    "s5p_eumetsat_ch4",
     "cmr_oco2",
     "cmr_oco3",
     "cmr_oco2_forward",
@@ -405,7 +404,6 @@ def monthly_checker_for(adapter_name: str):
     return {
         "cdsapi_cams_ghg": lambda audit, month_start: cams_ghg_has_month(audit, month_start),
         "s5p_pal_ch4": lambda audit, month_start: s5p_pal_ch4_has_month(month_start),
-        "s5p_eumetsat_ch4": lambda audit, month_start: eumdac_has_month("EO:EUM:DAT:1101", month_start),
         "cmr_oco2": lambda audit, month_start: cmr_has_month("OCO2_L2_Lite_FP", month_start, "11.3r"),
         "cmr_oco3": lambda audit, month_start: cmr_has_month("OCO3_L2_Lite_FP", month_start, "11r"),
         "cmr_oco2_forward": lambda audit, month_start: cmr_has_month("OCO2_L2_Fwd_FP", month_start, "11.3"),
@@ -435,7 +433,6 @@ def checker_for(adapter_name: str):
         "gportal_gcomc_l3_sst": lambda audit, day: gportal_has_day(audit, ("GCOM-C/SGLI", "LEVEL3", "Oceanic sphere", "L3-SST"), day),
         "gportal_gcomc_l2_aod": lambda audit, day: gportal_has_day(audit, ("GCOM-C/SGLI", "LEVEL2", "Atmosphere", "L2-ARNP"), day, bbox=list(audit.AOI_ITALY_BBOX)),
         "s5p_pal_ch4": lambda audit, day: ("not_applicable", "0", "monthly product"),
-        "s5p_eumetsat_ch4": lambda audit, day: ("not_applicable", "0", "monthly product companion"),
         "cdsapi_cams_ghg": lambda audit, day: ("not_applicable", "0", "monthly product"),
         "cdsapi_era5_land": lambda audit, day: era5_has_day(audit, day, land=True),
         "cdsapi_era5": lambda audit, day: era5_has_day(audit, day, land=False),

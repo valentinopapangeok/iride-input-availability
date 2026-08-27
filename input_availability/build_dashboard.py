@@ -35,7 +35,6 @@ EXPECTED_LATENCY_DAYS: dict[tuple[str, str], int | None] = {
     ("06", "MTG Cloud Mask"): 0,
     ("07/08", "CAMS GHG"): None,
     ("07", "S5P-PAL CH4"): 14,
-    ("07", "S5P EUMETSAT CH4"): 1,
     ("08", "OCO-2"): 30,
     ("08", "OCO-3"): 30,
     ("08", "OCO-2 Forward"): 7,
