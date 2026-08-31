@@ -447,7 +447,7 @@ def monthly_checker_for(adapter_name: str):
         "cdsapi_cams_ghg": lambda audit, month_start: cams_ghg_has_month(audit, month_start),
         "s5p_pal_ch4": lambda audit, month_start: s5p_pal_ch4_has_month(month_start),
         "cmr_oco2": lambda audit, month_start: cmr_has_month("OCO2_L2_Lite_FP", month_start, cmr_latest_collection_version("OCO2_L2_Lite_FP")),
-        "cmr_oco3": lambda audit, month_start: cmr_has_month("OCO3_L2_Lite_FP", month_start, "11r"),
+        "cmr_oco3": lambda audit, month_start: cmr_has_month("OCO3_L2_Lite_FP", month_start, cmr_latest_collection_version("OCO3_L2_Lite_FP")),
         "cmr_oco2_forward": lambda audit, month_start: cmr_has_month("OCO2_L2_Fwd_FP", month_start, "11.3"),
         "cmr_oco3_forward": lambda audit, month_start: cmr_has_month("OCO3_L2_Fwd_FP", month_start, "11"),
     }.get(adapter_name)
@@ -464,7 +464,7 @@ def checker_for(adapter_name: str):
         "podaac_viirs_sst": lambda audit, day: cmr_has_day("VIIRS_NPP-STAR-L2P-v2.80", day),
         "earthaccess_viirs_snow": lambda audit, day: cmr_has_day("VNP10A1F", day, bounding_box=audit.AOI_ITALY_BBOX),
         "cmr_oco2": lambda audit, day: cmr_has_day("OCO2_L2_Lite_FP", day, cmr_latest_collection_version("OCO2_L2_Lite_FP")),
-        "cmr_oco3": lambda audit, day: cmr_has_day("OCO3_L2_Lite_FP", day, "11r"),
+        "cmr_oco3": lambda audit, day: cmr_has_day("OCO3_L2_Lite_FP", day, cmr_latest_collection_version("OCO3_L2_Lite_FP")),
         "cmr_oco2_forward": lambda audit, day: cmr_has_day("OCO2_L2_Fwd_FP", day, "11.3"),
         "cmr_oco3_forward": lambda audit, day: cmr_has_day("OCO3_L2_Fwd_FP", day, "11"),
         "eumdac_sarah3_dni": lambda audit, day: eumdac_has_day("EO:EUM:DAT:0863", day, product_filter=lambda p: str(p).startswith("DNIin")),

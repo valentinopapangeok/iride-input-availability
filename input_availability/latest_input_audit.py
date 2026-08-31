@@ -885,7 +885,7 @@ def run_oco2(adapter: Adapter) -> dict:
 
 
 def run_oco3(adapter: Adapter) -> dict:
-    return run_cmr_latest(adapter, "OCO3_L2_Lite_FP", "11r", download_sample=True)
+    return run_cmr_latest(adapter, "OCO3_L2_Lite_FP", cmr_latest_collection_version("OCO3_L2_Lite_FP"), download_sample=True)
 
 
 def run_oco2_forward(adapter: Adapter) -> dict:
