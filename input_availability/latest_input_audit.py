@@ -756,6 +756,48 @@ def run_s5p_pal_ch4(adapter: Adapter) -> dict:
     }
 
 
+
+_CMR_LATEST_VERSION_CACHE: dict[str, str | None] = {}
+
+
+def cmr_latest_collection_version(short_name: str) -> str | None:
+    """Return the newest NASA CMR collection version for a short_name.
+
+    CMR keeps old OCO collection versions alive. For OCO-2 Lite we want the
+    newest available Lite FP collection, not a hardcoded retrospective version.
+    """
+    import re
+    import requests
+
+    if short_name in _CMR_LATEST_VERSION_CACHE:
+        return _CMR_LATEST_VERSION_CACHE[short_name]
+
+    response = requests.get(
+        "https://cmr.earthdata.nasa.gov/search/collections.json",
+        params={"short_name": short_name, "page_size": 100},
+        timeout=60,
+        verify=False,
+    )
+    response.raise_for_status()
+    entries = response.json().get("feed", {}).get("entry", [])
+    versions = [entry.get("version_id", "") for entry in entries if entry.get("version_id")]
+    if not versions:
+        _CMR_LATEST_VERSION_CACHE[short_name] = None
+        return None
+
+    def version_key(version: str) -> tuple:
+        # Examples: 11.2r, 11.3r, 11r. Keep non-numeric suffix only as tie-breaker.
+        parts = re.findall(r"\d+|[A-Za-z]+", version)
+        key = []
+        for part in parts:
+            key.append((0, int(part)) if part.isdigit() else (1, part.lower()))
+        return tuple(key)
+
+    latest_version = sorted(versions, key=version_key)[-1]
+    _CMR_LATEST_VERSION_CACHE[short_name] = latest_version
+    return latest_version
+
+
 def run_cmr_latest(adapter: Adapter, short_name: str, version: str | None = None, download_sample: bool = False) -> dict:
     import requests
     import earthaccess
@@ -839,7 +881,7 @@ def run_cmr_latest(adapter: Adapter, short_name: str, version: str | None = None
 
 
 def run_oco2(adapter: Adapter) -> dict:
-    return run_cmr_latest(adapter, "OCO2_L2_Lite_FP", "11.3r", download_sample=True)
+    return run_cmr_latest(adapter, "OCO2_L2_Lite_FP", cmr_latest_collection_version("OCO2_L2_Lite_FP"), download_sample=True)
 
 
 def run_oco3(adapter: Adapter) -> dict:

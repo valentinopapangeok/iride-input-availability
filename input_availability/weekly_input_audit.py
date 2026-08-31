@@ -135,6 +135,48 @@ def cdse_has_day(audit, day: dt.date, product_type: str, contains_name: str | No
     return ("present" if vals else "missing", str(len(vals)), vals[0].get("Name", "") if vals else "")
 
 
+
+_CMR_LATEST_VERSION_CACHE: dict[str, str | None] = {}
+
+
+def cmr_latest_collection_version(short_name: str) -> str | None:
+    """Return the newest NASA CMR collection version for a short_name.
+
+    CMR keeps old OCO collection versions alive. For OCO-2 Lite we want the
+    newest available Lite FP collection, not a hardcoded retrospective version.
+    """
+    import re
+    import requests
+
+    if short_name in _CMR_LATEST_VERSION_CACHE:
+        return _CMR_LATEST_VERSION_CACHE[short_name]
+
+    response = requests.get(
+        "https://cmr.earthdata.nasa.gov/search/collections.json",
+        params={"short_name": short_name, "page_size": 100},
+        timeout=60,
+        verify=False,
+    )
+    response.raise_for_status()
+    entries = response.json().get("feed", {}).get("entry", [])
+    versions = [entry.get("version_id", "") for entry in entries if entry.get("version_id")]
+    if not versions:
+        _CMR_LATEST_VERSION_CACHE[short_name] = None
+        return None
+
+    def version_key(version: str) -> tuple:
+        # Examples: 11.2r, 11.3r, 11r. Keep non-numeric suffix only as tie-breaker.
+        parts = re.findall(r"\d+|[A-Za-z]+", version)
+        key = []
+        for part in parts:
+            key.append((0, int(part)) if part.isdigit() else (1, part.lower()))
+        return tuple(key)
+
+    latest_version = sorted(versions, key=version_key)[-1]
+    _CMR_LATEST_VERSION_CACHE[short_name] = latest_version
+    return latest_version
+
+
 def cmr_has_day(short_name: str, day: dt.date, version: str | None = None, bounding_box: tuple[float, float, float, float] | None = None) -> tuple[str, str, str]:
     import requests
     params = {
@@ -404,7 +446,7 @@ def monthly_checker_for(adapter_name: str):
     return {
         "cdsapi_cams_ghg": lambda audit, month_start: cams_ghg_has_month(audit, month_start),
         "s5p_pal_ch4": lambda audit, month_start: s5p_pal_ch4_has_month(month_start),
-        "cmr_oco2": lambda audit, month_start: cmr_has_month("OCO2_L2_Lite_FP", month_start, "11.3r"),
+        "cmr_oco2": lambda audit, month_start: cmr_has_month("OCO2_L2_Lite_FP", month_start, cmr_latest_collection_version("OCO2_L2_Lite_FP")),
         "cmr_oco3": lambda audit, month_start: cmr_has_month("OCO3_L2_Lite_FP", month_start, "11r"),
         "cmr_oco2_forward": lambda audit, month_start: cmr_has_month("OCO2_L2_Fwd_FP", month_start, "11.3"),
         "cmr_oco3_forward": lambda audit, month_start: cmr_has_month("OCO3_L2_Fwd_FP", month_start, "11"),
@@ -421,7 +463,7 @@ def checker_for(adapter_name: str):
         "earthdata_modis_aod": lambda audit, day: modis_has_day(audit, "MCD19A2", "061", day),
         "podaac_viirs_sst": lambda audit, day: cmr_has_day("VIIRS_NPP-STAR-L2P-v2.80", day),
         "earthaccess_viirs_snow": lambda audit, day: cmr_has_day("VNP10A1F", day, bounding_box=audit.AOI_ITALY_BBOX),
-        "cmr_oco2": lambda audit, day: cmr_has_day("OCO2_L2_Lite_FP", day, "11.3r"),
+        "cmr_oco2": lambda audit, day: cmr_has_day("OCO2_L2_Lite_FP", day, cmr_latest_collection_version("OCO2_L2_Lite_FP")),
         "cmr_oco3": lambda audit, day: cmr_has_day("OCO3_L2_Lite_FP", day, "11r"),
         "cmr_oco2_forward": lambda audit, day: cmr_has_day("OCO2_L2_Fwd_FP", day, "11.3"),
         "cmr_oco3_forward": lambda audit, day: cmr_has_day("OCO3_L2_Fwd_FP", day, "11"),
