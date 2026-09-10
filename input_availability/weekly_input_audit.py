@@ -444,13 +444,17 @@ def cmr_has_month(short_name: str, month_start: dt.date, version: str | None = N
 
 def monthly_checker_for(adapter_name: str):
     return {
-        "cdsapi_cams_ghg": lambda audit, month_start: cams_ghg_has_month(audit, month_start),
+        "cdsapi_cams_ghg": lambda audit, month_start: ("unknown", "0", "cdsapi_cams_ghg: skipped expensive monthly ADS retrieval; infer from latest month only"),
         "s5p_pal_ch4": lambda audit, month_start: s5p_pal_ch4_has_month(month_start),
         "cmr_oco2": lambda audit, month_start: cmr_has_month("OCO2_L2_Lite_FP", month_start, cmr_latest_collection_version("OCO2_L2_Lite_FP")),
         "cmr_oco3": lambda audit, month_start: cmr_has_month("OCO3_L2_Lite_FP", month_start, cmr_latest_collection_version("OCO3_L2_Lite_FP")),
         "cmr_oco2_forward": lambda audit, month_start: cmr_has_month("OCO2_L2_Fwd_FP", month_start, "11.3"),
         "cmr_oco3_forward": lambda audit, month_start: cmr_has_month("OCO3_L2_Fwd_FP", month_start, "11"),
     }.get(adapter_name)
+
+
+def infer_only_has_day(adapter_name: str, day: dt.date) -> tuple[str, str, str]:
+    return ("unknown", "0", f"{adapter_name}: skipped expensive provider retrieval; infer from latest date only")
 
 
 def checker_for(adapter_name: str):
@@ -476,10 +480,14 @@ def checker_for(adapter_name: str):
         "gportal_gcomc_l2_aod": lambda audit, day: gportal_has_day(audit, ("GCOM-C/SGLI", "LEVEL2", "Atmosphere", "L2-ARNP"), day, bbox=list(audit.AOI_ITALY_BBOX)),
         "s5p_pal_ch4": lambda audit, day: ("not_applicable", "0", "monthly product"),
         "cdsapi_cams_ghg": lambda audit, day: ("not_applicable", "0", "monthly product"),
-        "cdsapi_era5_land": lambda audit, day: era5_has_day(audit, day, land=True),
-        "cdsapi_era5": lambda audit, day: era5_has_day(audit, day, land=False),
-        "cdsapi_cams_aod": lambda audit, day: cams_aod_has_day(audit, day),
-        "copernicusmarine_cmems": lambda audit, day: cmems_has_day(day),
+        # These providers require slow retrieval/dry-run calls for exact-date validation.
+        # For the weekly table we keep the run lightweight: dates newer than latest
+        # are already marked missing, the latest date is reused as present, and
+        # older dates are left as unknown instead of triggering downloads/probes.
+        "cdsapi_era5_land": lambda audit, day: infer_only_has_day("cdsapi_era5_land", day),
+        "cdsapi_era5": lambda audit, day: infer_only_has_day("cdsapi_era5", day),
+        "cdsapi_cams_aod": lambda audit, day: infer_only_has_day("cdsapi_cams_aod", day),
+        "copernicusmarine_cmems": lambda audit, day: infer_only_has_day("copernicusmarine_cmems", day),
     }.get(adapter_name)
 
 
