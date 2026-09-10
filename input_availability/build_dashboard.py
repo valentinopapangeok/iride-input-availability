@@ -346,7 +346,7 @@ def build_site(results_dir: Path, output_dir: Path) -> None:
     latest_rows = main_rows(all_latest_rows)
     replacements = replacement_rows(all_latest_rows)
     run_at = all_latest_rows[0].get("run_at_utc", "unknown") if all_latest_rows else "unknown"
-    latency_rows = summarize_history(csv_paths, latest_rows)
+    latency_rows = summarize_history(csv_paths, latest_rows + replacements)
     weekly_csv = discover_latest_weekly_csv(results_dir)
     weekly_rows = main_rows(read_rows(weekly_csv)) if weekly_csv else []
 
