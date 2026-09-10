@@ -51,9 +51,12 @@ for logger_name in [
     logging.getLogger(logger_name).setLevel(logging.ERROR)
 
 FIELDS = [
-    "run_at_utc", "adapter", "product", "input_name", "found", "downloaded",
+    "run_at_utc", "adapter", "product", "input_name", "section", "found", "downloaded",
     "duration_seconds", "status", "latest_date", "files_found", "downloaded_file",
-    "credential_status", "notes"
+    "credential_status", "notes",
+    "primary_code", "primary_status", "primary_latest_date", "primary_files_found",
+    "fallback_code", "fallback_status", "fallback_latest_date", "fallback_files_found",
+    "selected_code",
 ]
 
 
@@ -220,6 +223,7 @@ class Adapter:
     input_name: str
     required_env: tuple[str, ...]
     runner: Callable[["Adapter"], dict]
+    section: str = "main"
 
     def run(self) -> dict:
         missing = missing_env(*self.required_env)
@@ -896,6 +900,94 @@ def run_oco3_forward(adapter: Adapter) -> dict:
     return run_cmr_latest(adapter, "OCO3_L2_Fwd_FP", "11", download_sample=True)
 
 
+def cmr_code_parts(code: str) -> tuple[str, str | None]:
+    # PO.DAAC SST short names include a dotted semantic version in the short_name itself.
+    if code.startswith(("VIIRS_", "N21-")):
+        return code, None
+    short_name, sep, version = code.rpartition(".")
+    if sep and version.isdigit():
+        return short_name, version
+    return code, None
+
+
+def cmr_latest_granule_for_replacement(code: str, *, bounding_box: tuple[float, float, float, float] | None = None) -> dict:
+    import requests
+
+    short_name, version = cmr_code_parts(code)
+    params = {
+        "short_name": short_name,
+        "page_size": 1,
+        "sort_key": "-start_date",
+    }
+    if version:
+        params["version"] = version
+    if bounding_box:
+        params["bounding_box"] = ",".join(str(value) for value in bounding_box)
+    response = requests.get(
+        "https://cmr.earthdata.nasa.gov/search/granules.json",
+        params=params,
+        timeout=60,
+        verify=False,
+    )
+    response.raise_for_status()
+    entries = response.json().get("feed", {}).get("entry", [])
+    if not entries:
+        return {"code": code, "status": "missing", "latest_date": "", "files_found": "0", "notes": ""}
+    entry = entries[0]
+    return {
+        "code": code,
+        "status": "present",
+        "latest_date": entry.get("time_start", ""),
+        "files_found": "1",
+        "notes": entry.get("producer_granule_id") or entry.get("title", ""),
+    }
+
+
+def run_replacement_pair(
+    adapter: Adapter,
+    *,
+    primary_code: str,
+    fallback_code: str,
+    bounding_box: tuple[float, float, float, float] | None = None,
+) -> dict:
+    primary = cmr_latest_granule_for_replacement(primary_code, bounding_box=bounding_box)
+    fallback = cmr_latest_granule_for_replacement(fallback_code, bounding_box=bounding_box)
+    selected = primary if primary["status"] == "present" else fallback
+    found = selected["status"] == "present"
+    return {
+        "status": "found" if found else "no_data_found",
+        "latest_date": selected.get("latest_date", ""),
+        "files_found": selected.get("files_found", "0"),
+        "downloaded_file": "",
+        "notes": f"primary={primary.get('notes','')}; fallback={fallback.get('notes','')}",
+        "primary_code": primary_code,
+        "primary_status": primary["status"],
+        "primary_latest_date": primary.get("latest_date", ""),
+        "primary_files_found": primary.get("files_found", "0"),
+        "fallback_code": fallback_code,
+        "fallback_status": fallback["status"],
+        "fallback_latest_date": fallback.get("latest_date", ""),
+        "fallback_files_found": fallback.get("files_found", "0"),
+        "selected_code": selected.get("code", "") if found else "",
+    }
+
+
+def run_replacement_viirs_lst(adapter: Adapter) -> dict:
+    return run_replacement_pair(adapter, primary_code="VJ121A1D.002", fallback_code="VJ221A1D.002", bounding_box=AOI_ITALY_BBOX)
+
+
+def run_replacement_viirs_sst(adapter: Adapter) -> dict:
+    return run_replacement_pair(adapter, primary_code="VIIRS_N20-STAR-L2P-v2.80", fallback_code="N21-VIIRS-L2P-ACSPO-v2.80")
+
+
+def run_replacement_viirs_snow(adapter: Adapter) -> dict:
+    return run_replacement_pair(adapter, primary_code="VJ110A1F", fallback_code="VJ210A1F", bounding_box=AOI_ITALY_BBOX)
+
+
+def run_replacement_viirs_aod(adapter: Adapter) -> dict:
+    return run_replacement_pair(adapter, primary_code="VJ119A2.002", fallback_code="VJ219A2.002", bounding_box=AOI_ITALY_BBOX)
+
+
 def run_viirs_sst(adapter: Adapter) -> dict:
     return run_cmr_latest(adapter, "VIIRS_NPP-STAR-L2P-v2.80", download_sample=True)
 
@@ -1143,6 +1235,10 @@ ADAPTERS = [
     Adapter("cdse_sentinel3_synergy_aod", "09", "Sentinel-3 SYNERGY AOD", (), run_s3_synergy_aod),
     Adapter("gportal_gcomc_l2_aod", "09", "GCOM-C SGLI L2 Atmosphere ARNP", ("GPORTAL_USER", "GPORTAL_PASSWORD"), run_gportal_gcomc_l2_aod),
     Adapter("earthdata_modis_aod", "09", "MODIS AOD", ("EARTHDATA_USER", "EARTHDATA_PASSWORD"), run_modis_aod),
+    Adapter("replacement_viirs_lst", "01", "VIIRS LST replacement", (), run_replacement_viirs_lst, section="replacement"),
+    Adapter("replacement_viirs_sst", "02", "VIIRS SST replacement", (), run_replacement_viirs_sst, section="replacement"),
+    Adapter("replacement_viirs_snow", "05", "VIIRS snow replacement", (), run_replacement_viirs_snow, section="replacement"),
+    Adapter("replacement_viirs_aod", "09", "VIIRS AOD replacement", (), run_replacement_viirs_aod, section="replacement"),
 ]
 
 
@@ -1165,6 +1261,7 @@ def main() -> int:
             "adapter": adapter.name,
             "product": adapter.product,
             "input_name": adapter.input_name,
+            "section": adapter.section,
             **result,
         }
         write_result(row, results_path)

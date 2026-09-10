@@ -120,6 +120,18 @@ def escape(value: object) -> str:
     return html.escape(str(value if value is not None else ""))
 
 
+def is_replacement_row(row: dict) -> bool:
+    return row.get("section", "main") == "replacement"
+
+
+def main_rows(rows: list[dict]) -> list[dict]:
+    return [row for row in rows if not is_replacement_row(row)]
+
+
+def replacement_rows(rows: list[dict]) -> list[dict]:
+    return [row for row in rows if is_replacement_row(row)]
+
+
 def summarize_history(csv_paths: list[Path], latest_rows: list[dict]) -> list[dict]:
     current_keys = {(row.get("product", ""), row.get("input_name", "")) for row in latest_rows}
     grouped: dict[tuple[str, str], list[int]] = defaultdict(list)
@@ -263,6 +275,43 @@ def render_semestral_table(rows: list[dict]) -> str:
     )
 
 
+def render_replacement_table(rows: list[dict]) -> str:
+    rows = replacement_rows(rows)
+    if not rows:
+        return ""
+
+    def status_class(status: str) -> str:
+        return "ok" if status == "present" else "bad"
+
+    def date_text(value: str) -> str:
+        return value.split("T", 1)[0] if value else "-"
+
+    body = []
+    for row in sorted(rows, key=lambda r: (r.get("product", ""), r.get("input_name", ""))):
+        selected = row.get("selected_code") or "-"
+        cls = "ok" if row.get("found") == "yes" else "bad"
+        body.append(f"""
+          <tr class="{cls}">
+            <td>{escape(row.get('product'))}</td>
+            <td>{escape(row.get('input_name'))}</td>
+            <td class="{status_class(row.get('primary_status', ''))}">{escape(row.get('primary_code') or '-')}</td>
+            <td>{escape(row.get('primary_status') or '-')}</td>
+            <td>{escape(date_text(row.get('primary_latest_date', '')))}</td>
+            <td class="{status_class(row.get('fallback_status', ''))}">{escape(row.get('fallback_code') or '-')}</td>
+            <td>{escape(row.get('fallback_status') or '-')}</td>
+            <td>{escape(date_text(row.get('fallback_latest_date', '')))}</td>
+            <td>{escape(selected)}</td>
+          </tr>
+        """)
+    return """
+    <h2>Replacement availability</h2>
+    <p class="hint">Candidate replacement inputs only. These rows are not included in the main availability, weekly/semestral, or historical latency tables.</p>
+    <table>
+      <thead><tr><th>Product</th><th>Replacement input</th><th>Primary code</th><th>Primary status</th><th>Primary latest</th><th>Fallback code</th><th>Fallback status</th><th>Fallback latest</th><th>Selected</th></tr></thead>
+      <tbody>
+    """ + "\n".join(body) + "</tbody></table>"
+
+
 def render_latency_table(rows: list[dict]) -> str:
     body = []
     for row in rows:
@@ -293,11 +342,13 @@ def build_site(results_dir: Path, output_dir: Path) -> None:
         return
 
     latest_csv = max(csv_paths, key=lambda path: path.stat().st_mtime)
-    latest_rows = read_rows(latest_csv)
-    run_at = latest_rows[0].get("run_at_utc", "unknown") if latest_rows else "unknown"
+    all_latest_rows = read_rows(latest_csv)
+    latest_rows = main_rows(all_latest_rows)
+    replacements = replacement_rows(all_latest_rows)
+    run_at = all_latest_rows[0].get("run_at_utc", "unknown") if all_latest_rows else "unknown"
     latency_rows = summarize_history(csv_paths, latest_rows)
     weekly_csv = discover_latest_weekly_csv(results_dir)
-    weekly_rows = read_rows(weekly_csv) if weekly_csv else []
+    weekly_rows = main_rows(read_rows(weekly_csv)) if weekly_csv else []
 
     shutil.copy2(latest_csv, output_dir / "latest_input_audit_results.csv")
     if weekly_csv:
@@ -306,6 +357,7 @@ def build_site(results_dir: Path, output_dir: Path) -> None:
         "run_at_utc": run_at,
         "source_csv": str(latest_csv),
         "latest": latest_rows,
+        "replacement": replacements,
         "weekly_source_csv": str(weekly_csv) if weekly_csv else "",
         "weekly": weekly_rows,
         "latency_summary": latency_rows,
@@ -353,6 +405,7 @@ a {{ color:#1d4ed8; }}
 {render_latest_table(latest_rows)}
 {render_weekly_table(weekly_rows)}
 {render_semestral_table(weekly_rows)}
+{render_replacement_table(replacements)}
 {render_latency_table(latency_rows)}
 <div class="footer">Generated automatically by GitHub Actions. Credentials and downloaded samples are not published.</div>
 </main></body></html>

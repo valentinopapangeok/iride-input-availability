@@ -487,6 +487,8 @@ def daily_rows(latest_rows: list[dict], run_at: str, audit) -> list[dict]:
     days = previous_complete_days(7)
     rows: list[dict] = []
     for latest in latest_rows:
+        if latest.get("section", "main") == "replacement":
+            continue
         adapter = latest.get("adapter", "")
         if adapter in MONTHLY_ADAPTERS:
             continue
@@ -532,6 +534,8 @@ def monthly_rows(latest_rows: list[dict], run_at: str, audit) -> list[dict]:
     months = recent_months(6)
     rows: list[dict] = []
     for latest in latest_rows:
+        if latest.get("section", "main") == "replacement":
+            continue
         adapter = latest.get("adapter", "")
         if adapter not in MONTHLY_ADAPTERS:
             continue
