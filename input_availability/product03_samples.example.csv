@@ -1,0 +1,4 @@
+area,datetime_utc,west,south,east,north
+North Italy,2026-10-01T10:00:00Z,6.5,43.5,13.8,47.2
+Central Italy,2026-10-01T10:00:00Z,8.5,40.8,15.5,44.5
+South Italy,2026-10-01T10:00:00Z,11.5,35.3,18.7,42.5
