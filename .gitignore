@@ -217,10 +217,14 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 # IRIDE input availability local/generated data
+.DS_Store
 input_availability/config.json
 input_availability/runtime_downloads/
 input_availability/audit_results/
 input_availability/site/
+input_availability/product03_samples.csv
+input_availability/product03_validation_downloads/
+input_availability/product03_validation_results/
 *.grib
 *.nc
 *.nc4

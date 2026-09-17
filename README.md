@@ -50,6 +50,32 @@ python input_availability/build_dashboard.py --output-dir site
 
 Local credentials can be provided through environment variables. A local `input_availability/config.json` is also supported but intentionally ignored by git.
 
+## Product 03 validation availability
+
+The dedicated Product 03 check compares the temporal and spatial availability of
+CM SAF SARAH-3 DNI input data with ERA5-Land
+`surface_solar_radiation_downwards` ground truth.
+
+Create a local sample file from the tracked example, then replace its dates, UTC
+times and bounding boxes:
+
+```bash
+cp input_availability/product03_samples.example.csv input_availability/product03_samples.csv
+python input_availability/product03_validation_availability.py \
+  --samples input_availability/product03_samples.csv
+```
+
+To inspect files already downloaded without contacting the providers again:
+
+```bash
+python input_availability/product03_validation_availability.py \
+  --samples input_availability/product03_samples.csv \
+  --reuse-downloads
+```
+
+Credentials, downloaded provider files, local samples and generated results are
+kept local and ignored by git.
+
 ## Outputs
 
 The generated site includes:
@@ -65,6 +91,9 @@ Do not commit:
 - `input_availability/config.json`
 - `input_availability/runtime_downloads/`
 - `input_availability/audit_results/`
+- `input_availability/product03_samples.csv`
+- `input_availability/product03_validation_downloads/`
+- `input_availability/product03_validation_results/`
 - provider data files such as GRIB/NetCDF/HDF
 
 ## Bulk upload repository secrets
