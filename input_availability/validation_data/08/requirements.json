@@ -1,0 +1,43 @@
+{
+  "name": "Carbon Dioxide column",
+  "months": [
+    "2024-03",
+    "2024-04",
+    "2024-05",
+    "2024-06",
+    "2024-07",
+    "2024-08",
+    "2024-09",
+    "2024-10",
+    "2024-11",
+    "2024-12",
+    "2025-01",
+    "2025-02"
+  ],
+  "datasets": [
+    {
+      "role": "input",
+      "name": "OCO-2 Lite FP",
+      "provider": "CMR",
+      "short_name": "OCO2_L2_Lite_FP"
+    },
+    {
+      "role": "input",
+      "name": "OCO-3 Lite FP",
+      "provider": "CMR",
+      "short_name": "OCO3_L2_Lite_FP"
+    },
+    {
+      "role": "supporting",
+      "name": "CAMS GHG CO2",
+      "provider": "ADS",
+      "variable": "co2_column_mean_molar_fraction"
+    },
+    {
+      "role": "ground_truth",
+      "name": "GOSAT FTS L3 CO2 V03.05",
+      "provider": "NIES",
+      "url": "https://data2.gosat.nies.go.jp/gallery/fts_l3_swir_co2_gallery_en.html"
+    }
+  ]
+}

@@ -225,11 +225,19 @@ input_availability/site/
 input_availability/product03_samples.csv
 input_availability/product03_validation_downloads/
 input_availability/product03_validation_results/
+input_availability/validation_data/*/ground_truth/**
+!input_availability/validation_data/*/ground_truth/.gitkeep
+input_availability/validation_data/*/evidence/**
+!input_availability/validation_data/*/evidence/.gitkeep
 *.grib
 *.nc
 *.nc4
 *.h5
 *.zip
+
+# Validation ground truth is a shared, versioned revalidation fixture.
+# Keep this exception after the generic scientific-data extensions above.
+!input_availability/validation_data/*/ground_truth/**
 
 # IDE local settings
 .idea/

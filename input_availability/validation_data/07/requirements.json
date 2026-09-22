@@ -1,0 +1,36 @@
+{
+  "name": "Methane column",
+  "months": [
+    "2024-03",
+    "2024-04",
+    "2024-05",
+    "2024-06",
+    "2024-07",
+    "2024-08",
+    "2024-09",
+    "2024-10",
+    "2024-11",
+    "2024-12",
+    "2025-01",
+    "2025-02"
+  ],
+  "datasets": [
+    {
+      "role": "input",
+      "name": "S5P-PAL L3 CH4",
+      "provider": "S5P-PAL"
+    },
+    {
+      "role": "supporting",
+      "name": "CAMS GHG CH4",
+      "provider": "ADS",
+      "variable": "ch4_column_mean_molar_fraction"
+    },
+    {
+      "role": "ground_truth",
+      "name": "GOSAT FTS L3 CH4 V03.05",
+      "provider": "NIES",
+      "url": "https://data2.gosat.nies.go.jp/gallery/fts_l3_swir_ch4_gallery_en.html"
+    }
+  ]
+}

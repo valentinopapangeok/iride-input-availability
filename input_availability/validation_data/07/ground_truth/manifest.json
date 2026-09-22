@@ -1,0 +1,114 @@
+{
+  "product": "07",
+  "generated_at_utc": "2026-09-22T14:25:45.542729+00:00",
+  "records": [
+    {
+      "month": "2024-03",
+      "status": "downloaded",
+      "file": "ground_truth/gosat_fts_l3_ch4_v03_05/2024-03/SWIRL3CH4_202403_V03.05.tar",
+      "bytes": 399360,
+      "provider": "NIES",
+      "dataset": "GOSAT FTS L3 CH4 V03.05",
+      "source_path": "/data/GU/SWIRL3CH4/2024/SWIRL3CH4_202403_V03.05.tar"
+    },
+    {
+      "month": "2024-04",
+      "status": "downloaded",
+      "file": "ground_truth/gosat_fts_l3_ch4_v03_05/2024-04/SWIRL3CH4_202404_V03.05.tar",
+      "bytes": 399360,
+      "provider": "NIES",
+      "dataset": "GOSAT FTS L3 CH4 V03.05",
+      "source_path": "/data/GU/SWIRL3CH4/2024/SWIRL3CH4_202404_V03.05.tar"
+    },
+    {
+      "month": "2024-05",
+      "status": "downloaded",
+      "file": "ground_truth/gosat_fts_l3_ch4_v03_05/2024-05/SWIRL3CH4_202405_V03.05.tar",
+      "bytes": 399360,
+      "provider": "NIES",
+      "dataset": "GOSAT FTS L3 CH4 V03.05",
+      "source_path": "/data/GU/SWIRL3CH4/2024/SWIRL3CH4_202405_V03.05.tar"
+    },
+    {
+      "month": "2024-06",
+      "status": "downloaded",
+      "file": "ground_truth/gosat_fts_l3_ch4_v03_05/2024-06/SWIRL3CH4_202406_V03.05.tar",
+      "bytes": 409600,
+      "provider": "NIES",
+      "dataset": "GOSAT FTS L3 CH4 V03.05",
+      "source_path": "/data/GU/SWIRL3CH4/2024/SWIRL3CH4_202406_V03.05.tar"
+    },
+    {
+      "month": "2024-07",
+      "status": "downloaded",
+      "file": "ground_truth/gosat_fts_l3_ch4_v03_05/2024-07/SWIRL3CH4_202407_V03.05.tar",
+      "bytes": 409600,
+      "provider": "NIES",
+      "dataset": "GOSAT FTS L3 CH4 V03.05",
+      "source_path": "/data/GU/SWIRL3CH4/2024/SWIRL3CH4_202407_V03.05.tar"
+    },
+    {
+      "month": "2024-08",
+      "status": "downloaded",
+      "file": "ground_truth/gosat_fts_l3_ch4_v03_05/2024-08/SWIRL3CH4_202408_V03.05.tar",
+      "bytes": 419840,
+      "provider": "NIES",
+      "dataset": "GOSAT FTS L3 CH4 V03.05",
+      "source_path": "/data/GU/SWIRL3CH4/2024/SWIRL3CH4_202408_V03.05.tar"
+    },
+    {
+      "month": "2024-09",
+      "status": "downloaded",
+      "file": "ground_truth/gosat_fts_l3_ch4_v03_05/2024-09/SWIRL3CH4_202409_V03.05.tar",
+      "bytes": 430080,
+      "provider": "NIES",
+      "dataset": "GOSAT FTS L3 CH4 V03.05",
+      "source_path": "/data/GU/SWIRL3CH4/2024/SWIRL3CH4_202409_V03.05.tar"
+    },
+    {
+      "month": "2024-10",
+      "status": "downloaded",
+      "file": "ground_truth/gosat_fts_l3_ch4_v03_05/2024-10/SWIRL3CH4_202410_V03.05.tar",
+      "bytes": 419840,
+      "provider": "NIES",
+      "dataset": "GOSAT FTS L3 CH4 V03.05",
+      "source_path": "/data/GU/SWIRL3CH4/2024/SWIRL3CH4_202410_V03.05.tar"
+    },
+    {
+      "month": "2024-11",
+      "status": "downloaded",
+      "file": "ground_truth/gosat_fts_l3_ch4_v03_05/2024-11/SWIRL3CH4_202411_V03.05.tar",
+      "bytes": 399360,
+      "provider": "NIES",
+      "dataset": "GOSAT FTS L3 CH4 V03.05",
+      "source_path": "/data/GU/SWIRL3CH4/2024/SWIRL3CH4_202411_V03.05.tar"
+    },
+    {
+      "month": "2024-12",
+      "status": "downloaded",
+      "file": "ground_truth/gosat_fts_l3_ch4_v03_05/2024-12/SWIRL3CH4_202412_V03.05.tar",
+      "bytes": 389120,
+      "provider": "NIES",
+      "dataset": "GOSAT FTS L3 CH4 V03.05",
+      "source_path": "/data/GU/SWIRL3CH4/2024/SWIRL3CH4_202412_V03.05.tar"
+    },
+    {
+      "month": "2025-01",
+      "status": "downloaded",
+      "file": "ground_truth/gosat_fts_l3_ch4_v03_05/2025-01/SWIRL3CH4_202501_V03.05.tar",
+      "bytes": 399360,
+      "provider": "NIES",
+      "dataset": "GOSAT FTS L3 CH4 V03.05",
+      "source_path": "/data/GU/SWIRL3CH4/2025/SWIRL3CH4_202501_V03.05.tar"
+    },
+    {
+      "month": "2025-02",
+      "status": "downloaded",
+      "file": "ground_truth/gosat_fts_l3_ch4_v03_05/2025-02/SWIRL3CH4_202502_V03.05.tar",
+      "bytes": 399360,
+      "provider": "NIES",
+      "dataset": "GOSAT FTS L3 CH4 V03.05",
+      "source_path": "/data/GU/SWIRL3CH4/2025/SWIRL3CH4_202502_V03.05.tar"
+    }
+  ]
+}

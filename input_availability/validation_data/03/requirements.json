@@ -1,0 +1,9 @@
+{
+  "name": "Solar Radiation",
+  "ground_truth": {
+    "name": "ERA5-Land surface solar radiation downwards",
+    "provider": "Copernicus CDS",
+    "dataset": "reanalysis-era5-land",
+    "variable": "surface_solar_radiation_downwards"
+  }
+}

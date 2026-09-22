@@ -1,0 +1,54 @@
+{
+  "product": "03",
+  "generated_at_utc": "2026-09-22T13:49:49.723005+00:00",
+  "records": [
+    {
+      "date": "2022-04-10",
+      "status": "downloaded",
+      "file": "ground_truth/era5_land/era5_land_surface_solar_radiation_downwards_20220410.nc",
+      "error": ""
+    },
+    {
+      "date": "2022-04-11",
+      "status": "downloaded",
+      "file": "ground_truth/era5_land/era5_land_surface_solar_radiation_downwards_20220411.nc",
+      "error": ""
+    },
+    {
+      "date": "2022-04-12",
+      "status": "downloaded",
+      "file": "ground_truth/era5_land/era5_land_surface_solar_radiation_downwards_20220412.nc",
+      "error": ""
+    },
+    {
+      "date": "2022-04-14",
+      "status": "downloaded",
+      "file": "ground_truth/era5_land/era5_land_surface_solar_radiation_downwards_20220414.nc",
+      "error": ""
+    },
+    {
+      "date": "2022-04-16",
+      "status": "downloaded",
+      "file": "ground_truth/era5_land/era5_land_surface_solar_radiation_downwards_20220416.nc",
+      "error": ""
+    },
+    {
+      "date": "2022-08-01",
+      "status": "downloaded",
+      "file": "ground_truth/era5_land/era5_land_surface_solar_radiation_downwards_20220801.nc",
+      "error": ""
+    },
+    {
+      "date": "2022-08-03",
+      "status": "downloaded",
+      "file": "ground_truth/era5_land/era5_land_surface_solar_radiation_downwards_20220803.nc",
+      "error": ""
+    },
+    {
+      "date": "2022-08-04",
+      "status": "downloaded",
+      "file": "ground_truth/era5_land/era5_land_surface_solar_radiation_downwards_20220804.nc",
+      "error": ""
+    }
+  ]
+}

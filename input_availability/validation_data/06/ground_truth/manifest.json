@@ -1,0 +1,138 @@
+{
+  "product": "06",
+  "generated_at_utc": "2026-09-22T13:51:38.107223+00:00",
+  "records": [
+    {
+      "datetime_utc": "2025-03-22T09:00:00Z",
+      "status": "downloaded",
+      "file": "ground_truth/msg_cloud_mask/2025-03-22/MSG3-SEVI-MSGCLMK-0100-0100-20250322090000.000000000Z-NA",
+      "bytes": 574060
+    },
+    {
+      "datetime_utc": "2025-03-22T10:00:00Z",
+      "status": "downloaded",
+      "file": "ground_truth/msg_cloud_mask/2025-03-22/MSG3-SEVI-MSGCLMK-0100-0100-20250322100000.000000000Z-NA",
+      "bytes": 596126
+    },
+    {
+      "datetime_utc": "2025-03-22T11:00:00Z",
+      "status": "downloaded",
+      "file": "ground_truth/msg_cloud_mask/2025-03-22/MSG3-SEVI-MSGCLMK-0100-0100-20250322110000.000000000Z-NA",
+      "bytes": 592752
+    },
+    {
+      "datetime_utc": "2025-03-22T12:00:00Z",
+      "status": "downloaded",
+      "file": "ground_truth/msg_cloud_mask/2025-03-22/MSG3-SEVI-MSGCLMK-0100-0100-20250322120000.000000000Z-NA",
+      "bytes": 597024
+    },
+    {
+      "datetime_utc": "2025-03-22T14:00:00Z",
+      "status": "downloaded",
+      "file": "ground_truth/msg_cloud_mask/2025-03-22/MSG3-SEVI-MSGCLMK-0100-0100-20250322140000.000000000Z-NA",
+      "bytes": 594223
+    },
+    {
+      "datetime_utc": "2025-03-22T15:00:00Z",
+      "status": "downloaded",
+      "file": "ground_truth/msg_cloud_mask/2025-03-22/MSG3-SEVI-MSGCLMK-0100-0100-20250322150000.000000000Z-NA",
+      "bytes": 578146
+    },
+    {
+      "datetime_utc": "2025-03-22T17:00:00Z",
+      "status": "downloaded",
+      "file": "ground_truth/msg_cloud_mask/2025-03-22/MSG3-SEVI-MSGCLMK-0100-0100-20250322170000.000000000Z-NA",
+      "bytes": 574909
+    },
+    {
+      "datetime_utc": "2025-03-23T00:00:00Z",
+      "status": "downloaded",
+      "file": "ground_truth/msg_cloud_mask/2025-03-23/MSG3-SEVI-MSGCLMK-0100-0100-20250323000000.000000000Z-NA",
+      "bytes": 538743
+    },
+    {
+      "datetime_utc": "2025-03-23T01:00:00Z",
+      "status": "downloaded",
+      "file": "ground_truth/msg_cloud_mask/2025-03-23/MSG3-SEVI-MSGCLMK-0100-0100-20250323010000.000000000Z-NA",
+      "bytes": 551562
+    },
+    {
+      "datetime_utc": "2025-03-23T09:00:00Z",
+      "status": "downloaded",
+      "file": "ground_truth/msg_cloud_mask/2025-03-23/MSG3-SEVI-MSGCLMK-0100-0100-20250323090000.000000000Z-NA",
+      "bytes": 576616
+    },
+    {
+      "datetime_utc": "2025-03-23T10:00:00Z",
+      "status": "downloaded",
+      "file": "ground_truth/msg_cloud_mask/2025-03-23/MSG3-SEVI-MSGCLMK-0100-0100-20250323100000.000000000Z-NA",
+      "bytes": 588778
+    },
+    {
+      "datetime_utc": "2025-03-23T11:00:00Z",
+      "status": "downloaded",
+      "file": "ground_truth/msg_cloud_mask/2025-03-23/MSG3-SEVI-MSGCLMK-0100-0100-20250323110000.000000000Z-NA",
+      "bytes": 589717
+    },
+    {
+      "datetime_utc": "2025-03-23T12:00:00Z",
+      "status": "downloaded",
+      "file": "ground_truth/msg_cloud_mask/2025-03-23/MSG3-SEVI-MSGCLMK-0100-0100-20250323120000.000000000Z-NA",
+      "bytes": 600458
+    },
+    {
+      "datetime_utc": "2025-03-23T18:00:00Z",
+      "status": "downloaded",
+      "file": "ground_truth/msg_cloud_mask/2025-03-23/MSG3-SEVI-MSGCLMK-0100-0100-20250323180000.000000000Z-NA",
+      "bytes": 560641
+    },
+    {
+      "datetime_utc": "2025-03-23T19:00:00Z",
+      "status": "downloaded",
+      "file": "ground_truth/msg_cloud_mask/2025-03-23/MSG3-SEVI-MSGCLMK-0100-0100-20250323190000.000000000Z-NA",
+      "bytes": 561565
+    },
+    {
+      "datetime_utc": "2025-04-16T07:00:00Z",
+      "status": "downloaded",
+      "file": "ground_truth/msg_cloud_mask/2025-04-16/MSG3-SEVI-MSGCLMK-0100-0100-20250416070000.000000000Z-NA",
+      "bytes": 536779
+    },
+    {
+      "datetime_utc": "2025-04-16T13:00:00Z",
+      "status": "downloaded",
+      "file": "ground_truth/msg_cloud_mask/2025-04-16/MSG3-SEVI-MSGCLMK-0100-0100-20250416130000.000000000Z-NA",
+      "bytes": 594546
+    },
+    {
+      "datetime_utc": "2025-04-16T14:00:00Z",
+      "status": "downloaded",
+      "file": "ground_truth/msg_cloud_mask/2025-04-16/MSG3-SEVI-MSGCLMK-0100-0100-20250416140000.000000000Z-NA",
+      "bytes": 588296
+    },
+    {
+      "datetime_utc": "2025-04-16T15:00:00Z",
+      "status": "downloaded",
+      "file": "ground_truth/msg_cloud_mask/2025-04-16/MSG3-SEVI-MSGCLMK-0100-0100-20250416150000.000000000Z-NA",
+      "bytes": 571667
+    },
+    {
+      "datetime_utc": "2025-04-17T07:00:00Z",
+      "status": "downloaded",
+      "file": "ground_truth/msg_cloud_mask/2025-04-17/MSG3-SEVI-MSGCLMK-0100-0100-20250417070000.000000000Z-NA",
+      "bytes": 531864
+    },
+    {
+      "datetime_utc": "2025-04-17T08:00:00Z",
+      "status": "downloaded",
+      "file": "ground_truth/msg_cloud_mask/2025-04-17/MSG3-SEVI-MSGCLMK-0100-0100-20250417080000.000000000Z-NA",
+      "bytes": 549054
+    },
+    {
+      "datetime_utc": "2025-04-17T12:00:00Z",
+      "status": "downloaded",
+      "file": "ground_truth/msg_cloud_mask/2025-04-17/MSG3-SEVI-MSGCLMK-0100-0100-20250417120000.000000000Z-NA",
+      "bytes": 604353
+    }
+  ]
+}

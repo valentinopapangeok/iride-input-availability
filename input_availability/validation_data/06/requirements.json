@@ -1,0 +1,49 @@
+{
+  "name": "Cloud Cover",
+  "dates": {
+    "2025-03-22": [
+      9,
+      10,
+      11,
+      12,
+      14,
+      15,
+      17
+    ],
+    "2025-03-23": [
+      0,
+      1,
+      9,
+      10,
+      11,
+      12,
+      18,
+      19
+    ],
+    "2025-04-16": [
+      7,
+      13,
+      14,
+      15
+    ],
+    "2025-04-17": [
+      7,
+      8,
+      12
+    ]
+  },
+  "datasets": [
+    {
+      "role": "input",
+      "name": "MTG Cloud Mask",
+      "provider": "EUMETSAT",
+      "collection": "EO:EUM:DAT:0800"
+    },
+    {
+      "role": "ground_truth",
+      "name": "MSG Cloud Mask",
+      "provider": "EUMETSAT",
+      "collection": "EO:EUM:DAT:MSG:CLM"
+    }
+  ]
+}
