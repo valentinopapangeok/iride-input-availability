@@ -619,27 +619,42 @@ def earthaccess_login_from_env():
     return True
 
 def run_viirs_snow(adapter: Adapter) -> dict:
+    import requests
     import earthaccess
-    earthaccess_login_from_env()
-    bbox = AOI_ITALY_BBOX
+
     short_name = "VNP10A1F"
-    for day in latest_day_candidates(14):
-        start = day.isoformat()
-        end = (day + dt.timedelta(days=1)).isoformat()
-        results = earthaccess.search_data(short_name=short_name, temporal=(start, end), bounding_box=bbox)
-        if results:
-            dest_dir = DOWNLOADS / "earthaccess" / adapter.name
-            dest_dir.mkdir(parents=True, exist_ok=True)
-            downloaded = earthaccess.download(results[:1], local_path=dest_dir, show_progress=False)
-            downloaded_file = str(downloaded[0]) if downloaded else ""
-            return {
-                "status": "downloaded" if downloaded_file else "found",
-                "latest_date": day.isoformat(),
-                "files_found": str(len(results)),
-                "downloaded_file": downloaded_file,
-                "notes": short_name,
-            }
-    return {"status": "no_data_found", "latest_date": "", "files_found": "0", "downloaded_file": "", "notes": "searched last 14 days for VNP10A1F"}
+    # Public discovery must succeed independently of Earthdata authentication.
+    response = requests.get(
+        "https://cmr.earthdata.nasa.gov/search/granules.json",
+        params={"short_name": short_name, "page_size": 1,
+                "sort_key": "-start_date",
+                "bounding_box": ",".join(map(str, AOI_ITALY_BBOX))},
+        timeout=60,
+    )
+    response.raise_for_status()
+    entries = response.json().get("feed", {}).get("entry", [])
+    if not entries:
+        return {"status": "no_data_found", "latest_date": "", "files_found": "0",
+                "downloaded_file": "", "notes": short_name}
+    entry = entries[0]
+    result = {"status": "found", "latest_date": entry["time_start"].split("T")[0],
+              "files_found": str(len(entries)), "downloaded_file": "",
+              "notes": entry.get("producer_granule_id") or entry.get("title", short_name)}
+    try:
+        if not earthaccess_login_from_env():
+            raise RuntimeError("missing Earthdata credentials for sample download")
+        # Retrieve the exact granule used as availability evidence.
+        results = earthaccess.search_data(concept_id=entry["id"])
+        dest_dir = DOWNLOADS / "earthaccess" / adapter.name
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        downloaded = earthaccess.download(results[:1], local_path=dest_dir, show_progress=False) if results else []
+        if downloaded and Path(downloaded[0]).is_file() and Path(downloaded[0]).stat().st_size:
+            result.update(status="downloaded", downloaded_file=str(downloaded[0]))
+        else:
+            result["notes"] += "; sample download returned no file"
+    except Exception as exc:
+        result["notes"] += f"; sample download failed: {type(exc).__name__}: {exc}"
+    return result
 
 
 def run_modis_latest(adapter: Adapter, short_name: str, version: str, notes: str) -> dict:
