@@ -1,0 +1,29 @@
+{
+  "month": "2024-07",
+  "matched_cells": 21,
+  "rmse_ppm": 7.368225621787724,
+  "bias_ppm": 6.897431029976634,
+  "reference_mean_ppm": 416.01136271158856,
+  "normalization": "mean",
+  "denominator_ppm": 416.01136271158856,
+  "relative_rmse_percent": 1.7711597043314298,
+  "threshold_percent": 20.0,
+  "preliminary_month_meets_threshold": true,
+  "settings": {
+    "month": "2024-07",
+    "tiff": null,
+    "reference": null,
+    "field": "Data/mixingRatio/XCO2",
+    "normalization": "mean",
+    "aggregation": "area",
+    "product_scale": 1.0,
+    "reference_scale": 1.0,
+    "min_coverage": 0.0,
+    "mask_value": null,
+    "threshold": 20.0,
+    "output": null
+  },
+  "tiff": "/Volumes/Extreme/IRIDE/MKPL/iride-input-availability-public/input_availability/validation_data/08/evidence/workflow_outputs/IRIDE-S_S5-02-08_202407_V1.tif",
+  "reference": "/Volumes/Extreme/IRIDE/MKPL/iride-input-availability-public/input_availability/validation_data/08/ground_truth/gosat_fts_l3_co2_v03_05/2024-07/SWIRL3CO2_202407_V03.05.tar",
+  "caveat": "Single-month diagnostic. Equal weight per matched GOSAT cell; valid TIFF support may cover only part of a reference cell. Final protocol pools months. GOSAT field is interpolated L3; mask filtering disabled unless explicitly selected."
+}
