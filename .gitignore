@@ -229,6 +229,7 @@ input_availability/validation_data/*/ground_truth/**
 !input_availability/validation_data/*/ground_truth/.gitkeep
 input_availability/validation_data/*/evidence/**
 !input_availability/validation_data/*/evidence/.gitkeep
+input_availability/validation_data/*/inputs/**
 *.grib
 *.nc
 *.nc4

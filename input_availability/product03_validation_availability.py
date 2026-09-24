@@ -27,6 +27,7 @@ import csv
 import datetime as dt
 import json
 import os
+import time
 import re
 import shutil
 import sys
@@ -131,7 +132,22 @@ def download_cmsaf_days(
     token = eumdac.AccessToken(
         (os.environ["EUMETSAT_CONSUMER_KEY"], os.environ["EUMETSAT_CONSUMER_SECRET"])
     )
-    collection = eumdac.DataStore(token).get_collection(collection_id)
+    store = eumdac.DataStore(token)
+    collection = None
+    last_error = None
+    for attempt in range(4):
+        try:
+            collection = store.get_collection(collection_id)
+            # Force the metadata request here so transient catalogue failures
+            # are retried before processing individual validation dates.
+            _ = collection.search_options
+            break
+        except Exception as exc:
+            last_error = exc
+            if attempt < 3:
+                time.sleep(2 ** attempt)
+    if collection is None:
+        raise RuntimeError(f"Could not open EUMETSAT collection {collection_id}") from last_error
     paths: dict[dt.date, Path] = {}
     errors: dict[dt.date, str] = {}
     destination = download_dir / "cmsaf"
@@ -140,11 +156,19 @@ def download_cmsaf_days(
     for day in sorted(set(days)):
         start, end = utc_day_bounds(day)
         try:
-            products = [
-                product
-                for product in collection.search(dtstart=start, dtend=end)
-                if str(product).startswith(f"DNIin{day:%Y%m%d}")
-            ]
+            products = None
+            for attempt in range(4):
+                try:
+                    products = [
+                        product
+                        for product in collection.search(dtstart=start, dtend=end)
+                        if str(product).startswith(f"DNIin{day:%Y%m%d}")
+                    ]
+                    break
+                except Exception:
+                    if attempt == 3:
+                        raise
+                    time.sleep(2 ** attempt)
             if not products:
                 errors[day] = "DNI product not found"
                 continue
