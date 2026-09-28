@@ -1,0 +1,29 @@
+{
+  "datetime_utc": "2022-08-03T10:00:00+00:00",
+  "interval_end_utc": "2022-08-03T11:00:00+00:00",
+  "era5_validity_utc": "2022-08-03T11:00:00+00:00",
+  "area": "Italy",
+  "bounds": [
+    6.5,
+    35.3,
+    18.7,
+    47.2
+  ],
+  "matched_cells": 3375,
+  "rmse_wh_m2": 176.63238851925635,
+  "bias_wh_m2": -85.3036309847402,
+  "reference_mean_wh_m2": 801.5556605761318,
+  "normalization": "mean",
+  "denominator_wh_m2": 801.5556605761318,
+  "rrmse": 0.2203619751026383,
+  "relative_rmse_percent": 22.03619751026383,
+  "threshold_percent": 20.0,
+  "preliminary_hour_meets_threshold": false,
+  "min_coverage": 0.0,
+  "product_unit": "Wh/m2",
+  "product_quantity": "direct_normal",
+  "tiff": "/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080310_V1.tif",
+  "reference": "/Users/alessandro/Desktop/Geo-K/iride-input-availability/input_availability/validation_data/03/ground_truth/era5_land/era5_land_surface_solar_radiation_downwards_20220803.nc",
+  "previous_reference": "/Users/alessandro/Desktop/Geo-K/iride-input-availability/input_availability/validation_data/03/ground_truth/era5_land/era5_land_surface_solar_radiation_downwards_20220803.nc",
+  "caveat": "Single-hour diagnostic on ERA5-Land grid cells whose centres lie in the samples CSV rectangle. This rectangle is not a VA polygon or Italy land mask. DNI is direct normal radiation, whereas ERA5 SSRD is total downward solar radiation; equal units do not make them the same physical quantity. Confirm the report normalization and VA areas before formal validation."
+}

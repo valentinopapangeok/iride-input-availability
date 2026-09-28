@@ -1,0 +1,25 @@
+datetime_utc,status,rrmse,rmse_wh_m2,matched_cells,reason,tiff
+2022-08-03T00:00:00+00:00,undefined_rrmse,,0.0,3375,Reference denominator is zero,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080300_V1.tif
+2022-08-03T01:00:00+00:00,undefined_rrmse,,0.0,3375,Reference denominator is zero,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080301_V1.tif
+2022-08-03T02:00:00+00:00,undefined_rrmse,,0.0,3375,Reference denominator is zero,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080302_V1.tif
+2022-08-03T03:00:00+00:00,validated,34.49623758792847,0.5777395800868148,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080303_V1.tif
+2022-08-03T04:00:00+00:00,validated,2.980151906296846,97.54266844966357,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080304_V1.tif
+2022-08-03T05:00:00+00:00,validated,1.5535596419414366,258.8731990621043,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080305_V1.tif
+2022-08-03T06:00:00+00:00,validated,0.8026494783500862,267.8282848410556,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080306_V1.tif
+2022-08-03T07:00:00+00:00,validated,0.39098154843986527,197.9131826220454,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080307_V1.tif
+2022-08-03T08:00:00+00:00,validated,0.18717682840616542,123.04756378162297,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080308_V1.tif
+2022-08-03T09:00:00+00:00,validated,0.14410013060190885,109.00528550031336,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080309_V1.tif
+2022-08-03T10:00:00+00:00,validated,0.2203619751026383,176.63238851925635,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080310_V1.tif
+2022-08-03T11:00:00+00:00,validated,0.281679215229252,218.7129202675906,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080311_V1.tif
+2022-08-03T12:00:00+00:00,validated,0.32370683139361717,235.58013421372223,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080312_V1.tif
+2022-08-03T13:00:00+00:00,validated,0.33450921264190187,220.44627942389317,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080313_V1.tif
+2022-08-03T14:00:00+00:00,validated,0.3849194665285086,195.62173085745934,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080314_V1.tif
+2022-08-03T15:00:00+00:00,validated,0.5798102752725056,216.494192859719,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080315_V1.tif
+2022-08-03T16:00:00+00:00,validated,0.9703845814242372,225.67178192157766,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080316_V1.tif
+2022-08-03T17:00:00+00:00,validated,1.5693059871758586,144.165501650491,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080317_V1.tif
+2022-08-03T18:00:00+00:00,validated,1.4755170552801027,13.845319374239466,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080318_V1.tif
+2022-08-03T19:00:00+00:00,undefined_rrmse,,0.0,3375,Reference denominator is zero,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080319_V1.tif
+2022-08-03T20:00:00+00:00,undefined_rrmse,,0.0,3375,Reference denominator is zero,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080320_V1.tif
+2022-08-03T21:00:00+00:00,undefined_rrmse,,0.0,3375,Reference denominator is zero,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080321_V1.tif
+2022-08-03T22:00:00+00:00,undefined_rrmse,,0.0,3375,Reference denominator is zero,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080322_V1.tif
+2022-08-03T23:00:00+00:00,excluded,,,,Pipeline integrates 23:00–23:30 only; TIFF metadata says 23:00–00:00,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080323_V1.tif

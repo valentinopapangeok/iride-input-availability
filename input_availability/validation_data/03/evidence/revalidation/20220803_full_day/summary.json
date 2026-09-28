@@ -1,0 +1,43 @@
+{
+  "date": "2022-08-03",
+  "tiff_dir": "/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list",
+  "reference": "/Users/alessandro/Desktop/Geo-K/iride-input-availability/input_availability/validation_data/03/ground_truth/era5_land/era5_land_surface_solar_radiation_downwards_20220803.nc",
+  "available_reference_hours": [
+    "00:00",
+    "01:00",
+    "02:00",
+    "03:00",
+    "04:00",
+    "05:00",
+    "06:00",
+    "07:00",
+    "08:00",
+    "09:00",
+    "10:00",
+    "11:00",
+    "12:00",
+    "13:00",
+    "14:00",
+    "15:00",
+    "16:00",
+    "17:00",
+    "18:00",
+    "19:00",
+    "20:00",
+    "21:00",
+    "22:00",
+    "23:00"
+  ],
+  "counts": {
+    "excluded": 1,
+    "undefined_rrmse": 7,
+    "validated": 16
+  },
+  "method": "Each full-hour TIFF is compared to de-accumulated ERA5-Land SSRD in Wh/m2 on the ERA5 grid; rRMSE is RMSE divided by the mean reference value.",
+  "limitations": [
+    "Product DNI and ERA5 SSRD are different solar-radiation quantities.",
+    "The area is the Italy rectangle from samples.csv, filtered by valid TIFF coverage.",
+    "Hour 23 is excluded because the workflow integrates only half an hour.",
+    "Selecting only the lowest rRMSE values requires disclosure of the full candidate set."
+  ]
+}

@@ -1,0 +1,17 @@
+rank,datetime_utc,status,rrmse,rmse_wh_m2,matched_cells,reason,tiff
+1,2022-08-03T09:00:00+00:00,validated,0.14410013060190885,109.00528550031336,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080309_V1.tif
+2,2022-08-03T08:00:00+00:00,validated,0.18717682840616542,123.04756378162297,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080308_V1.tif
+3,2022-08-03T10:00:00+00:00,validated,0.2203619751026383,176.63238851925635,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080310_V1.tif
+4,2022-08-03T11:00:00+00:00,validated,0.281679215229252,218.7129202675906,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080311_V1.tif
+5,2022-08-03T12:00:00+00:00,validated,0.32370683139361717,235.58013421372223,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080312_V1.tif
+6,2022-08-03T13:00:00+00:00,validated,0.33450921264190187,220.44627942389317,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080313_V1.tif
+7,2022-08-03T14:00:00+00:00,validated,0.3849194665285086,195.62173085745934,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080314_V1.tif
+8,2022-08-03T07:00:00+00:00,validated,0.39098154843986527,197.9131826220454,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080307_V1.tif
+9,2022-08-03T15:00:00+00:00,validated,0.5798102752725056,216.494192859719,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080315_V1.tif
+10,2022-08-03T06:00:00+00:00,validated,0.8026494783500862,267.8282848410556,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080306_V1.tif
+11,2022-08-03T16:00:00+00:00,validated,0.9703845814242372,225.67178192157766,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080316_V1.tif
+12,2022-08-03T18:00:00+00:00,validated,1.4755170552801027,13.845319374239466,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080318_V1.tif
+13,2022-08-03T05:00:00+00:00,validated,1.5535596419414366,258.8731990621043,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080305_V1.tif
+14,2022-08-03T17:00:00+00:00,validated,1.5693059871758586,144.165501650491,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080317_V1.tif
+15,2022-08-03T04:00:00+00:00,validated,2.980151906296846,97.54266844966357,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080304_V1.tif
+16,2022-08-03T03:00:00+00:00,validated,34.49623758792847,0.5777395800868148,3375,,/Users/alessandro/Desktop/Geo-K/iride-input-availability/09-24-2026-17-03-30_files_list/IRIDE-S_S5-02-03_2022080303_V1.tif
