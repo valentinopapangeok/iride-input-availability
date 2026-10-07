@@ -33,35 +33,10 @@ ANSI_RESET = "\033[0m"
 ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
 
 # Expected availability latency thresholds in days.
-# These are intentionally explicit and local so they can be adjusted when provider SLAs change.
+# These are product delivery budgets minus one day, not provider SLAs.
 # A latency value is highlighted only when it is strictly greater than the threshold.
-EXPECTED_LATENCY_DAYS: dict[tuple[str, str], int | None] = {
-    ("01/10", "Sentinel-3 LST"): 2,
-    ("01", "GCOM-C L3 LST"): 3,
-    ("01", "MODIS LST"): 3,
-    ("01", "ERA5-Land skin temperature"): 6,
-    ("01", "ERA5 skin temperature"): 6,
-    ("02/11", "Sentinel-3 WST"): 2,
-    ("02", "NPP/VIIRS SST"): 1,
-    ("02", "GCOM-C L3 SST"): 3,
-    ("02", "CMEMS-MED SST"): 1,
-    ("03", "CM SAF SARAH-3 DNI"): 3,
-    ("04", "MISTRAL radar"): 1,
-    ("04", "H SAF H40B"): 0,
-    ("05", "Sentinel-3 OLCI snow"): 2,
-    ("05", "VIIRS snow"): 3,
-    ("06", "MTG Cloud Mask"): 0,
-    ("07/08", "CAMS GHG"): None,  # monthly value; excluded from numeric averages by default
-    ("07", "S5P-PAL CH4"): 14,
-    ("08", "OCO-2"): 30,
-    ("08", "OCO-3"): 30,
-    ("08", "OCO-2 Forward"): 7,
-    ("08", "OCO-3 Forward"): 7,
-    ("09", "CAMS atmospheric composition forecast"): 1,
-    ("09", "Sentinel-3 SYNERGY AOD"): 2,
-    ("09", "GCOM-C SGLI L2 Atmosphere ARNP"): 2,
-    ("09", "MODIS AOD"): 3,
-}
+from latency_policy import expected_latency_days
+
 
 
 @dataclass(frozen=True)
@@ -240,7 +215,7 @@ def summarize(samples: list[Sample], key_fn, include_counts: bool = False, color
         else:
             avg = med = min_v = max_v = None
 
-        threshold = EXPECTED_LATENCY_DAYS.get((key[0], key[1])) if len(key) >= 2 else None
+        threshold = expected_latency_days(key[0])
         row = [
             *key,
             maybe_highlight_days(avg, threshold, color),

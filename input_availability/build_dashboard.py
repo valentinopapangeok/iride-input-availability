@@ -17,33 +17,8 @@ BASE = Path(__file__).resolve().parent
 DEFAULT_RESULTS = BASE / "audit_results"
 DEFAULT_SITE = BASE / "site"
 
-EXPECTED_LATENCY_DAYS: dict[tuple[str, str], int | None] = {
-    ("01/10", "Sentinel-3 LST"): 2,
-    ("01", "GCOM-C L3 LST"): 3,
-    ("01", "MODIS LST"): 3,
-    ("01", "ERA5-Land skin temperature"): 6,
-    ("01", "ERA5 skin temperature"): 6,
-    ("02/11", "Sentinel-3 WST"): 2,
-    ("02", "NPP/VIIRS SST"): 1,
-    ("02", "GCOM-C L3 SST"): 3,
-    ("02", "CMEMS-MED SST"): 1,
-    ("03", "CM SAF SARAH-3 DNI"): 3,
-    ("04", "MISTRAL radar"): 1,
-    ("04", "H SAF H40B"): 0,
-    ("05", "Sentinel-3 OLCI snow"): 2,
-    ("05", "VIIRS snow"): 3,
-    ("06", "MTG Cloud Mask"): 0,
-    ("07/08", "CAMS GHG"): None,
-    ("07", "S5P-PAL CH4"): 14,
-    ("08", "OCO-2"): 30,
-    ("08", "OCO-3"): 30,
-    ("08", "OCO-2 Forward"): 7,
-    ("08", "OCO-3 Forward"): 7,
-    ("09", "CAMS atmospheric composition forecast"): 1,
-    ("09", "Sentinel-3 SYNERGY AOD"): 2,
-    ("09", "GCOM-C SGLI L2 Atmosphere ARNP"): 2,
-    ("09", "MODIS AOD"): 3,
-}
+from latency_policy import expected_latency_days
+
 
 
 def parse_run_datetime(value: str) -> dt.datetime | None:
@@ -102,7 +77,7 @@ def latency_for(row: dict) -> int | None:
 def css_class_for(row: dict, latency: int | None) -> str:
     if row.get("found") != "yes":
         return "bad"
-    threshold = EXPECTED_LATENCY_DAYS.get((row.get("product", ""), row.get("input_name", "")))
+    threshold = expected_latency_days(row.get("product", ""))
     if latency is not None and threshold is not None and latency > threshold:
         return "warn"
     return "ok"
@@ -185,7 +160,7 @@ def render_latest_table(rows: list[dict]) -> str:
     for row in sorted(rows, key=lambda r: (r.get("product", ""), r.get("input_name", ""))):
         lat = latency_for(row)
         cls = css_class_for(row, lat)
-        threshold = EXPECTED_LATENCY_DAYS.get((row.get("product", ""), row.get("input_name", "")))
+        threshold = expected_latency_days(row.get("product", ""))
         threshold_text = "monthly" if threshold is None and re.fullmatch(r"\d{4}-\d{2}", row.get("latest_date", "")) else ("-" if threshold is None else f"{threshold}d")
         body.append(f"""
           <tr class="{cls}">
@@ -200,6 +175,7 @@ def render_latest_table(rows: list[dict]) -> str:
         """)
     return """
     <h2>Latest availability</h2>
+    <p class="hint">Expected input latency = product delivery timeliness minus 1 day (not a provider SLA). Monthly-only dates remain excluded from numeric latency.</p>
     <table>
       <thead><tr><th>Product</th><th>Input</th><th>Status</th><th>Latest available</th><th>Latency</th><th>Expected</th><th>Files</th></tr></thead>
       <tbody>
