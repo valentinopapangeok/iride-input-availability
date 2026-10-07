@@ -215,7 +215,7 @@ def summarize(samples: list[Sample], key_fn, include_counts: bool = False, color
         else:
             avg = med = min_v = max_v = None
 
-        threshold = expected_latency_days(key[0])
+        threshold = expected_latency_days(key[0], max((s.latest_date for s in group if s.latest_date), default=None))
         row = [
             *key,
             maybe_highlight_days(avg, threshold, color),

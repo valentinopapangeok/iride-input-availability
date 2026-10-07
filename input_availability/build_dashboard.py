@@ -17,7 +17,7 @@ BASE = Path(__file__).resolve().parent
 DEFAULT_RESULTS = BASE / "audit_results"
 DEFAULT_SITE = BASE / "site"
 
-from latency_policy import expected_latency_days
+from latency_policy import expected_latency_days, is_monthly_product
 
 
 
@@ -77,7 +77,7 @@ def latency_for(row: dict) -> int | None:
 def css_class_for(row: dict, latency: int | None) -> str:
     if row.get("found") != "yes":
         return "bad"
-    threshold = expected_latency_days(row.get("product", ""))
+    threshold = expected_latency_days(row.get("product", ""), parse_latest_date(row.get("latest_date", ""))[0])
     if latency is not None and threshold is not None and latency > threshold:
         return "warn"
     return "ok"
@@ -160,8 +160,8 @@ def render_latest_table(rows: list[dict]) -> str:
     for row in sorted(rows, key=lambda r: (r.get("product", ""), r.get("input_name", ""))):
         lat = latency_for(row)
         cls = css_class_for(row, lat)
-        threshold = expected_latency_days(row.get("product", ""))
-        threshold_text = "monthly" if threshold is None and re.fullmatch(r"\d{4}-\d{2}", row.get("latest_date", "")) else ("-" if threshold is None else f"{threshold}d")
+        threshold = expected_latency_days(row.get("product", ""), parse_latest_date(row.get("latest_date", ""))[0])
+        threshold_text = "1 month + 8d" if is_monthly_product(row.get("product", "")) else "monthly" if threshold is None and re.fullmatch(r"\d{4}-\d{2}", row.get("latest_date", "")) else ("-" if threshold is None else f"{threshold}d")
         body.append(f"""
           <tr class="{cls}">
             <td>{escape(row.get('product'))}</td>
