@@ -3,10 +3,9 @@ name: Input availability dashboard
 on:
   workflow_dispatch:
   schedule:
-    # Temporary validation schedule during summer time:
-    # 19:00 UTC = 21:00 Europe/Rome; 04:00 UTC = 06:00 Europe/Rome.
-    - cron: "0 19 * * *"
-    - cron: "0 4 * * *"
+    # Daily at noon and 23:00 Italian time; handles daylight-saving changes.
+    - cron: "0 12,23 * * *"
+      timezone: "Europe/Rome"
 
 permissions:
   contents: read
