@@ -1127,74 +1127,18 @@ def run_gportal_search_download(
     bbox: list[float] | None = None,
     product_filter: Callable[[object], bool] | None = None,
 ) -> dict:
-    import gportal
-
-    gportal.username = os.environ["GPORTAL_USER"]
-    gportal.password = os.environ["GPORTAL_PASSWORD"]
-    datasets = gportal.datasets()
-    dataset_id = datasets
-    for part in dataset_path:
-        dataset_id = dataset_id[part]
-    dest_dir = DOWNLOADS / "gportal" / adapter.name
-    dest_dir.mkdir(parents=True, exist_ok=True)
-
+    from gportal_csw import search_day
     for day in latest_day_candidates(search_days):
-        start = f"{day.isoformat()}T00:00:00"
-        end = f"{day.isoformat()}T23:59:59"
-        try:
-            kwargs = {
-                "dataset_ids": dataset_id,
-                "start_time": start,
-                "end_time": end,
-                "count": 20,
-            }
-            if bbox:
-                kwargs["bbox"] = bbox
-            if params:
-                kwargs["params"] = params
-            res = gportal.search(**kwargs)
-            products = list(res.products())
-            if product_filter:
-                products = [product for product in products if product_filter(product)]
-            if not products:
-                continue
-
-            day_dir = dest_dir / day.isoformat()
-            day_dir.mkdir(exist_ok=True)
-            existing = sorted(p for p in day_dir.iterdir() if p.is_file())
-            first_file = str(existing[0]) if existing else ""
-            download_note = notes
-            if not first_file:
-                try:
-                    downloaded = gportal.download(products[:1], local_dir=str(day_dir))
-                    if isinstance(downloaded, str):
-                        downloaded_files = [downloaded]
-                    else:
-                        downloaded_files = list(downloaded or [])
-                    existing = sorted(p for p in day_dir.iterdir() if p.is_file())
-                    first_file = downloaded_files[0] if downloaded_files else (str(existing[0]) if existing else "")
-                except Exception as download_exc:
-                    download_note = f"{notes}; search ok, download failed: {type(download_exc).__name__}"
+        products = search_day(dataset_path, day, params=params, bbox=bbox, product_filter=product_filter)
+        if products:
+            latest = max(products, key=lambda p: p.get("beginPosition", ""))
             return {
-                "status": "downloaded" if first_file else "found",
-                "latest_date": day.isoformat(),
-                "files_found": str(len(products)),
-                "downloaded_file": first_file,
-                "notes": download_note,
+                "status": "found", "latest_date": day.isoformat(),
+                "files_found": str(len(products)), "downloaded_file": "",
+                "notes": f"{notes}; new CSW catalogue verified; download not attempted: new SFTP key integration pending; catalogue_updated={latest.get('catalogue_updated', '')}",
             }
-        except Exception as exc:
-            msg = str(exc).lower()
-            if any(token in msg for token in ["auth", "login", "password", "permission", "forbidden", "unauthorized"]):
-                raise
-            continue
-
-    return {
-        "status": "no_data_found",
-        "latest_date": "",
-        "files_found": "0",
-        "downloaded_file": "",
-        "notes": "searched last 14 days",
-    }
+    return {"status": "no_data_found", "latest_date": "", "files_found": "0",
+            "downloaded_file": "", "notes": f"new CSW: searched last {search_days} days"}
 
 
 def run_gportal_gcomc_l3_lst(adapter: Adapter) -> dict:
@@ -1226,13 +1170,13 @@ def run_gportal_gcomc_l2_aod(adapter: Adapter) -> dict:
 
 ADAPTERS = [
     Adapter("cdse_sentinel3_lst", "01/10", "Sentinel-3 LST", (), run_s3_lstr),
-    Adapter("gportal_gcomc_l3_lst", "01", "GCOM-C L3 LST", ("GPORTAL_USER", "GPORTAL_PASSWORD"), run_gportal_gcomc_l3_lst),
+    Adapter("gportal_gcomc_l3_lst", "01", "GCOM-C L3 LST", (), run_gportal_gcomc_l3_lst),
     Adapter("earthdata_modis_lst", "01", "MODIS LST", ("EARTHDATA_USER", "EARTHDATA_PASSWORD"), run_modis_lst),
     Adapter("cdsapi_era5_land", "01", "ERA5-Land skin temperature", ("CDS_URL", "CDS_KEY"), run_era5_land),
     Adapter("cdsapi_era5", "01", "ERA5 skin temperature", ("CDS_URL", "CDS_KEY"), run_era5_single_level),
     Adapter("cdse_sentinel3_wst", "02/11", "Sentinel-3 WST", (), run_s3_wst),
     Adapter("podaac_viirs_sst", "02", "NPP/VIIRS SST", (), run_viirs_sst),
-    Adapter("gportal_gcomc_l3_sst", "02", "GCOM-C L3 SST", ("GPORTAL_USER", "GPORTAL_PASSWORD"), run_gportal_gcomc_l3_sst),
+    Adapter("gportal_gcomc_l3_sst", "02", "GCOM-C L3 SST", (), run_gportal_gcomc_l3_sst),
     Adapter("copernicusmarine_cmems", "02", "CMEMS-MED SST", ("CMEMS_USER", "CMEMS_PASSWORD"), run_cmems_med_sst),
     Adapter("eumdac_sarah3_dni", "03", "CM SAF SARAH-3 DNI", ("EUMETSAT_CONSUMER_KEY", "EUMETSAT_CONSUMER_SECRET"), run_sarah3_dni),
     Adapter("meteohub_mistral_radar", "04", "MISTRAL radar", (), run_mistral_radar),
@@ -1248,7 +1192,7 @@ ADAPTERS = [
     Adapter("cmr_oco3_forward", "08", "OCO-3 Forward", (), run_oco3_forward),
     Adapter("cdsapi_cams_aod", "09", "CAMS atmospheric composition forecast", ("ADS_URL", "ADS_KEY"), run_cams_aod),
     Adapter("cdse_sentinel3_synergy_aod", "09", "Sentinel-3 SYNERGY AOD", (), run_s3_synergy_aod),
-    Adapter("gportal_gcomc_l2_aod", "09", "GCOM-C SGLI L2 Atmosphere ARNP", ("GPORTAL_USER", "GPORTAL_PASSWORD"), run_gportal_gcomc_l2_aod),
+    Adapter("gportal_gcomc_l2_aod", "09", "GCOM-C SGLI L2 Atmosphere ARNP", (), run_gportal_gcomc_l2_aod),
     Adapter("earthdata_modis_aod", "09", "MODIS AOD", ("EARTHDATA_USER", "EARTHDATA_PASSWORD"), run_modis_aod),
     Adapter("replacement_viirs_lst", "01", "VIIRS LST replacement", (), run_replacement_viirs_lst, section="replacement"),
     Adapter("replacement_viirs_sst", "02", "VIIRS SST replacement", (), run_replacement_viirs_sst, section="replacement"),

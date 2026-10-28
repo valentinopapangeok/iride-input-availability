@@ -258,21 +258,9 @@ def meteohub_has_day(audit, day: dt.date) -> tuple[str, str, str]:
 
 
 def gportal_has_day(audit, dataset_path: tuple[str, ...], day: dt.date, params: dict | None = None, bbox: list[float] | None = None, product_filter: Callable[[object], bool] | None = None) -> tuple[str, str, str]:
-    import gportal
-    gportal.username = os.environ["GPORTAL_USER"]
-    gportal.password = os.environ["GPORTAL_PASSWORD"]
-    dataset_id = gportal.datasets()
-    for part in dataset_path:
-        dataset_id = dataset_id[part]
-    kwargs = {"dataset_ids": dataset_id, "start_time": f"{day.isoformat()}T00:00:00", "end_time": f"{day.isoformat()}T23:59:59", "count": 20}
-    if params:
-        kwargs["params"] = params
-    if bbox:
-        kwargs["bbox"] = bbox
-    products = list(gportal.search(**kwargs).products())
-    if product_filter:
-        products = [p for p in products if product_filter(p)]
-    return ("present" if products else "missing", str(len(products)), "/".join(dataset_path))
+    from gportal_csw import search_day
+    products = search_day(dataset_path, day, params=params, bbox=bbox, product_filter=product_filter)
+    return ("present" if products else "missing", str(len(products)), "new CSW: " + "/".join(dataset_path))
 
 
 def cmems_has_day(day: dt.date) -> tuple[str, str, str]:
