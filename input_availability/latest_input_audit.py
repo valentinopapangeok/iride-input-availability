@@ -723,26 +723,13 @@ def run_cams_ghg(adapter: Adapter) -> dict:
 
 def run_s5p_pal_ch4(adapter: Adapter) -> dict:
     import requests
-    import urllib3
+    from s5p_pal import monthly_ch4, latest_monthly_ch4, observation_start
 
-    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-    url = "https://data-portal.s5p-pal.com/api/s5p-l3/collections/ch4/items"
-    params = {
-        "limit": 100,
-        "filter": "l3:period='month'",
-        "filter-lang": "cql2-text",
-    }
-    response = requests.get(url, params=params, verify=False, timeout=60)
-    response.raise_for_status()
-    features = response.json().get("features", [])
-    if not features:
+    features = monthly_ch4()
+    latest = latest_monthly_ch4()
+    if latest is None:
         return {"status": "no_data_found", "latest_date": "", "files_found": "0", "downloaded_file": "", "notes": "no PAL CH4 monthly items"}
 
-    def sort_key(feature: dict) -> str:
-        props = feature.get("properties", {})
-        return props.get("archive_date") or props.get("end_datetime") or props.get("datetime") or feature.get("id", "")
-
-    latest = sorted(features, key=sort_key, reverse=True)[0]
     props = latest.get("properties", {})
     assets = latest.get("assets", {})
     asset_href = ""
@@ -755,7 +742,7 @@ def run_s5p_pal_ch4(adapter: Adapter) -> dict:
             try:
                 filename = sanitize_filename(Path(urllib.parse.urlparse(asset_href).path).name or latest.get("id", "download"))
                 dest = dest_dir / filename
-                response = requests.get(asset_href, stream=True, verify=False, timeout=300)
+                response = requests.get(asset_href, stream=True, timeout=300)
                 response.raise_for_status()
                 with dest.open("wb") as dst:
                     for chunk in response.iter_content(1024 * 1024):
@@ -768,10 +755,10 @@ def run_s5p_pal_ch4(adapter: Adapter) -> dict:
             break
     return {
         "status": "downloaded" if downloaded_file else "found",
-        "latest_date": props.get("end_datetime") or props.get("datetime") or latest.get("id", ""),
+        "latest_date": observation_start(latest).isoformat(),
         "files_found": str(len(features)),
         "downloaded_file": downloaded_file,
-        "notes": asset_href or latest.get("id", ""),
+        "notes": f"{asset_href or latest.get('id', '')}; observation_month={observation_start(latest):%Y-%m}; archive_date={props.get('archive_date', '')}",
     }
 
 

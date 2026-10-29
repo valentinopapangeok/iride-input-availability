@@ -386,29 +386,14 @@ def cams_ghg_has_month(audit, month_start: dt.date) -> tuple[str, str, str]:
 
 
 def s5p_pal_ch4_has_month(month_start: dt.date) -> tuple[str, str, str]:
-    import requests
+    from s5p_pal import monthly_ch4, observation_start
 
     month = month_start.strftime("%Y-%m")
-    response = requests.get(
-        "https://data-portal.s5p-pal.com/api/s5p-l3/collections/ch4/items",
-        params={"limit": 100, "filter": "l3:period='month'", "filter-lang": "cql2-text"},
-        verify=False,
-        timeout=60,
-    )
-    response.raise_for_status()
-    features = response.json().get("features", [])
-    matches = []
-    for feature in features:
-        props = feature.get("properties", {})
-        candidates = [
-            props.get("archive_date", ""),
-            props.get("end_datetime", ""),
-            props.get("datetime", ""),
-            feature.get("id", ""),
-        ]
-        if any(str(value).startswith(month) or month.replace("-", "") in str(value) for value in candidates):
-            matches.append(feature)
-    return ("present" if matches else "missing", str(len(matches)), f"S5P-PAL CH4 month={month}")
+    matches = [
+        feature for feature in monthly_ch4()
+        if observation_start(feature).strftime("%Y-%m") == month
+    ]
+    return ("present" if matches else "missing", str(len(matches)), f"S5P-PAL CH4 observation_month={month}")
 
 
 def cmr_has_month(short_name: str, month_start: dt.date, version: str | None = None) -> tuple[str, str, str]:
