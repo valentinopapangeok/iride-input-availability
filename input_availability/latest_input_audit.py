@@ -1127,15 +1127,21 @@ def run_gportal_search_download(
     bbox: list[float] | None = None,
     product_filter: Callable[[object], bool] | None = None,
 ) -> dict:
-    from gportal_csw import search_day
+    from gportal_csw import search_day, download_sample
     for day in latest_day_candidates(search_days):
         products = search_day(dataset_path, day, params=params, bbox=bbox, product_filter=product_filter)
         if products:
             latest = max(products, key=lambda p: p.get("beginPosition", ""))
+            downloaded_file = ""
+            download_note = ""
+            try:
+                downloaded_file = download_sample(latest, DOWNLOADS / "gportal" / adapter.name / day.isoformat())
+            except Exception as exc:
+                download_note = f"; SFTP download failed: {type(exc).__name__}"
             return {
-                "status": "found", "latest_date": day.isoformat(),
-                "files_found": str(len(products)), "downloaded_file": "",
-                "notes": f"{notes}; new CSW catalogue verified; download not attempted: new SFTP key integration pending; catalogue_updated={latest.get('catalogue_updated', '')}",
+                "status": "downloaded" if downloaded_file else "found", "latest_date": day.isoformat(),
+                "files_found": str(len(products)), "downloaded_file": downloaded_file,
+                "notes": f"{notes}; new CSW; catalogue_updated={latest.get('catalogue_updated', '')}{download_note}",
             }
     return {"status": "no_data_found", "latest_date": "", "files_found": "0",
             "downloaded_file": "", "notes": f"new CSW: searched last {search_days} days"}
