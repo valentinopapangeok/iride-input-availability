@@ -52,7 +52,7 @@ for logger_name in [
 
 FIELDS = [
     "run_at_utc", "adapter", "product", "input_name", "section", "found", "downloaded",
-    "duration_seconds", "status", "latest_date", "files_found", "downloaded_file",
+    "duration_seconds", "status", "latest_date", "publication_date", "publication_source", "files_found", "downloaded_file",
     "credential_status", "notes",
     "primary_code", "primary_status", "primary_latest_date", "primary_files_found",
     "fallback_code", "fallback_status", "fallback_latest_date", "fallback_files_found",
@@ -365,6 +365,8 @@ def run_cdse_query(
             return {
                 "status": "downloaded" if downloaded_file else "found",
                 "latest_date": day.isoformat(),
+                "publication_date": vals[0].get("PublicationDate", ""),
+                "publication_source": "CDSE PublicationDate",
                 "files_found": str(len(vals)),
                 "downloaded_file": downloaded_file,
                 "credential_status": "not_required_for_search",
@@ -756,6 +758,8 @@ def run_s5p_pal_ch4(adapter: Adapter) -> dict:
     return {
         "status": "downloaded" if downloaded_file else "found",
         "latest_date": observation_start(latest).isoformat(),
+        "publication_date": props.get("archive_date", ""),
+        "publication_source": "S5P-PAL archive_date (portal archival timestamp)",
         "files_found": str(len(features)),
         "downloaded_file": downloaded_file,
         "notes": f"{asset_href or latest.get('id', '')}; observation_month={observation_start(latest):%Y-%m}; archive_date={props.get('archive_date', '')}",

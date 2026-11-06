@@ -168,6 +168,7 @@ def render_latest_table(rows: list[dict]) -> str:
             <td>{escape(row.get('input_name'))}</td>
             <td>{escape(row.get('status'))}</td>
             <td>{escape(row.get('latest_date') or '-')}</td>
+            <td title="{escape(row.get('publication_source') or '')}">{escape(row.get('publication_date') or 'Not reported')}</td>
             <td>{'-' if lat is None else f'{lat}d'}</td>
             <td>{threshold_text}</td>
             <td>{escape(row.get('files_found') or '0')}</td>
@@ -175,9 +176,9 @@ def render_latest_table(rows: list[dict]) -> str:
         """)
     return """
     <h2>Latest availability</h2>
-    <p class="hint">Expected input latency = product delivery timeliness minus 1 day (not a provider SLA). Monthly-only dates remain excluded from numeric latency.</p>
+    <p class="hint">Expected input latency = product delivery timeliness minus 1 day (not a provider SLA). Monthly-only dates remain excluded from numeric latency. Publication dates refer to the selected latest input: CDSE publication or PAL portal archival time; hover for the source. Not reported means no publication timestamp is exposed by the adapter. Catalogue modification and download times are not publication dates.</p>
     <table>
-      <thead><tr><th>Product</th><th>Input</th><th>Status</th><th>Latest available</th><th>Latency</th><th>Expected</th><th>Files</th></tr></thead>
+      <thead><tr><th>Product</th><th>Input</th><th>Status</th><th>Latest available</th><th>Publication date</th><th>Latency</th><th>Expected</th><th>Files</th></tr></thead>
       <tbody>
     """ + "\n".join(body) + "</tbody></table>"
 
