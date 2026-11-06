@@ -620,15 +620,14 @@ def earthaccess_login_from_env():
     earthaccess.login(strategy="environment", persist=False)
     return True
 
-def run_viirs_snow(adapter: Adapter) -> dict:
+def run_viirs_snow(adapter: Adapter, short_name: str) -> dict:
     import requests
     import earthaccess
 
-    short_name = "VNP10A1F"
     # Public discovery must succeed independently of Earthdata authentication.
     response = requests.get(
         "https://cmr.earthdata.nasa.gov/search/granules.json",
-        params={"short_name": short_name, "page_size": 1,
+        params={"short_name": short_name, "version": "2", "page_size": 1,
                 "sort_key": "-start_date",
                 "bounding_box": ",".join(map(str, AOI_ITALY_BBOX))},
         timeout=60,
@@ -982,20 +981,8 @@ def run_replacement_viirs_lst(adapter: Adapter) -> dict:
     return run_replacement_pair(adapter, primary_code="VJ121A1D.002", fallback_code="VJ221A1D.002", bounding_box=AOI_ITALY_BBOX)
 
 
-def run_replacement_viirs_sst(adapter: Adapter) -> dict:
-    return run_replacement_pair(adapter, primary_code="VIIRS_N20-STAR-L2P-v2.80", fallback_code="N21-VIIRS-L2P-ACSPO-v2.80")
-
-
-def run_replacement_viirs_snow(adapter: Adapter) -> dict:
-    return run_replacement_pair(adapter, primary_code="VJ110A1F", fallback_code="VJ210A1F", bounding_box=AOI_ITALY_BBOX)
-
-
 def run_replacement_viirs_aod(adapter: Adapter) -> dict:
     return run_replacement_pair(adapter, primary_code="VJ119A2.002", fallback_code="VJ219A2.002", bounding_box=AOI_ITALY_BBOX)
-
-
-def run_viirs_sst(adapter: Adapter) -> dict:
-    return run_cmr_latest(adapter, "VIIRS_NPP-STAR-L2P-v2.80", download_sample=True)
 
 
 def run_eumdac_latest(
@@ -1172,14 +1159,16 @@ ADAPTERS = [
     Adapter("cdsapi_era5_land", "01", "ERA5-Land skin temperature", ("CDS_URL", "CDS_KEY"), run_era5_land),
     Adapter("cdsapi_era5", "01", "ERA5 skin temperature", ("CDS_URL", "CDS_KEY"), run_era5_single_level),
     Adapter("cdse_sentinel3_wst", "02/11", "Sentinel-3 WST", (), run_s3_wst),
-    Adapter("podaac_viirs_sst", "02", "NPP/VIIRS SST", (), run_viirs_sst),
+    Adapter("viirs_n20_sst", "02", "VIIRS NOAA-20 SST (primary)", (), lambda a: run_cmr_latest(a, "VIIRS_N20-STAR-L2P-v2.80", download_sample=True)),
+    Adapter("viirs_n21_sst", "02", "VIIRS NOAA-21 SST (fallback)", (), lambda a: run_cmr_latest(a, "N21-VIIRS-L2P-ACSPO-v2.80", download_sample=True)),
     Adapter("gportal_gcomc_l3_sst", "02", "GCOM-C L3 SST", (), run_gportal_gcomc_l3_sst),
     Adapter("copernicusmarine_cmems", "02", "CMEMS-MED SST", ("CMEMS_USER", "CMEMS_PASSWORD"), run_cmems_med_sst),
     Adapter("eumdac_sarah3_dni", "03", "CM SAF SARAH-3 DNI", ("EUMETSAT_CONSUMER_KEY", "EUMETSAT_CONSUMER_SECRET"), run_sarah3_dni),
     Adapter("meteohub_mistral_radar", "04", "MISTRAL radar", (), run_mistral_radar),
     Adapter("hsaf_h40", "04", "H SAF H40B", ("EUMETSAT_CONSUMER_KEY", "EUMETSAT_CONSUMER_SECRET"), run_hsaf_h40b_datastore),
     Adapter("cdse_sentinel3_olci_snow", "05", "Sentinel-3 OLCI snow", (), run_s3_olci_snow),
-    Adapter("earthaccess_viirs_snow", "05", "VIIRS snow", ("EARTHDATA_USER", "EARTHDATA_PASSWORD"), run_viirs_snow),
+    Adapter("viirs_n20_snow", "05", "VIIRS NOAA-20 snow (primary)", (), lambda a: run_viirs_snow(a, "VJ110A1F")),
+    Adapter("viirs_n21_snow", "05", "VIIRS NOAA-21 snow (fallback)", (), lambda a: run_viirs_snow(a, "VJ210A1F")),
     Adapter("eumdac_mtg_cloudmask", "06", "MTG Cloud Mask", ("EUMETSAT_CONSUMER_KEY", "EUMETSAT_CONSUMER_SECRET"), run_mtg_cloudmask),
     Adapter("cdsapi_cams_ghg", "07/08", "CAMS GHG", ("ADS_URL", "ADS_KEY"), run_cams_ghg),
     Adapter("s5p_pal_ch4", "07", "S5P-PAL CH4", (), run_s5p_pal_ch4),
@@ -1192,8 +1181,6 @@ ADAPTERS = [
     Adapter("gportal_gcomc_l2_aod", "09", "GCOM-C SGLI L2 Atmosphere ARNP", (), run_gportal_gcomc_l2_aod),
     Adapter("earthdata_modis_aod", "09", "MODIS AOD", ("EARTHDATA_USER", "EARTHDATA_PASSWORD"), run_modis_aod),
     Adapter("replacement_viirs_lst", "01", "VIIRS LST replacement", (), run_replacement_viirs_lst, section="replacement"),
-    Adapter("replacement_viirs_sst", "02", "VIIRS SST replacement", (), run_replacement_viirs_sst, section="replacement"),
-    Adapter("replacement_viirs_snow", "05", "VIIRS snow replacement", (), run_replacement_viirs_snow, section="replacement"),
     Adapter("replacement_viirs_aod", "09", "VIIRS AOD replacement", (), run_replacement_viirs_aod, section="replacement"),
 ]
 
