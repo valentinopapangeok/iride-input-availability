@@ -22,6 +22,7 @@ import time
 import urllib.parse
 import urllib.request
 import warnings
+from provider_dates import nasa_dates
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
@@ -53,7 +54,7 @@ for logger_name in [
 FIELDS = [
     "run_at_utc", "adapter", "product", "input_name", "section", "found", "downloaded",
     "duration_seconds", "status", "latest_date", "publication_date", "publication_source", "files_found", "downloaded_file",
-    "credential_status", "notes",
+    "credential_status", "notes", "production_date", "catalogue_date", "catalogue_date_source", "timestamp_note",
     "primary_code", "primary_status", "primary_latest_date", "primary_files_found",
     "fallback_code", "fallback_status", "fallback_latest_date", "fallback_files_found",
     "selected_code",
@@ -638,7 +639,8 @@ def run_viirs_snow(adapter: Adapter, short_name: str) -> dict:
         return {"status": "no_data_found", "latest_date": "", "files_found": "0",
                 "downloaded_file": "", "notes": short_name}
     entry = entries[0]
-    result = {"status": "found", "latest_date": entry["time_start"].split("T")[0],
+    timestamp_fields = nasa_dates(entry["id"])
+    result = {**timestamp_fields, "status": "found", "latest_date": entry["time_start"].split("T")[0],
               "files_found": str(len(entries)), "downloaded_file": "",
               "notes": entry.get("producer_granule_id") or entry.get("title", short_name)}
     try:
@@ -669,6 +671,7 @@ def run_modis_latest(adapter: Adapter, short_name: str, version: str, notes: str
         granules = list(granule_client.query(start_date=day.isoformat(), end_date=day.isoformat(), bounding_box=list(AOI_ITALY_BBOX)))
         if granules:
             downloaded_file = ""
+            timestamp_fields = {}
             dest_dir = DOWNLOADS / "earthaccess" / adapter.name
             dest_dir.mkdir(parents=True, exist_ok=True)
             try:
@@ -679,13 +682,14 @@ def run_modis_latest(adapter: Adapter, short_name: str, version: str, notes: str
                 search_kwargs["bounding_box"] = AOI_ITALY_BBOX
                 results = earthaccess.search_data(**search_kwargs)
                 if results:
+                    timestamp_fields = nasa_dates(results[0]["meta"]["concept-id"])
                     downloaded = earthaccess.download(results[:1], local_path=dest_dir, show_progress=False)
                     if downloaded:
                         downloaded_file = str(downloaded[0])
             except Exception as exc:
                 notes = f"{notes}; sample download failed: {type(exc).__name__}"
             status = "downloaded" if downloaded_file else "found"
-            return {"status": status, "latest_date": day.isoformat(), "files_found": str(len(granules)), "downloaded_file": downloaded_file, "notes": notes}
+            return {**timestamp_fields, "status": status, "latest_date": day.isoformat(), "files_found": str(len(granules)), "downloaded_file": downloaded_file, "notes": notes}
     return {"status": "no_data_found", "latest_date": "", "files_found": "0", "downloaded_file": "", "notes": "searched last 14 days"}
 
 
@@ -855,6 +859,7 @@ def run_cmr_latest(adapter: Adapter, short_name: str, version: str | None = None
     if not entries:
         return {"status": "no_data_found", "latest_date": "", "files_found": "0", "downloaded_file": "", "notes": short_name}
     entry = entries[0]
+    timestamp_fields = nasa_dates(entry["id"])
     if not title or title == short_name:
         title = entry.get("producer_granule_id") or entry.get("title", "")
     downloaded_file = ""
@@ -886,7 +891,7 @@ def run_cmr_latest(adapter: Adapter, short_name: str, version: str | None = None
                     status = "downloaded"
         except Exception as exc:
             title = f"{title}; sample download failed: {type(exc).__name__}"
-    return {"status": status, "latest_date": latest, "files_found": "1", "downloaded_file": downloaded_file, "notes": title}
+    return {**timestamp_fields, "status": status, "latest_date": latest, "files_found": "1", "downloaded_file": downloaded_file, "notes": title}
 
 
 def run_oco2(adapter: Adapter) -> dict:
@@ -1119,6 +1124,8 @@ def run_gportal_search_download(
             return {
                 "status": "downloaded" if downloaded_file else "found", "latest_date": day.isoformat(),
                 "files_found": str(len(products)), "downloaded_file": downloaded_file,
+                "catalogue_date": latest.get("catalogue_updated", ""),
+                "catalogue_date_source": "JAXA catalogue update (not initial publication)",
                 "notes": f"{notes}; new CSW; catalogue_updated={latest.get('catalogue_updated', '')}{download_note}",
             }
     return {"status": "no_data_found", "latest_date": "", "files_found": "0",

@@ -169,6 +169,8 @@ def render_latest_table(rows: list[dict]) -> str:
             <td>{escape(row.get('status'))}</td>
             <td>{escape(row.get('latest_date') or '-')}</td>
             <td title="{escape(row.get('publication_source') or '')}">{escape(row.get('publication_date') or 'Not reported')}</td>
+            <td>{escape(row.get('production_date') or 'Not reported')}</td>
+            <td title="{escape(row.get('catalogue_date_source') or '')}">{escape(row.get('catalogue_date') or 'Not reported')}<br><small>{escape(row.get('catalogue_date_source') or '')}</small></td>
             <td>{'-' if lat is None else f'{lat}d'}</td>
             <td>{threshold_text}</td>
             <td>{escape(row.get('files_found') or '0')}</td>
@@ -178,7 +180,7 @@ def render_latest_table(rows: list[dict]) -> str:
     <h2>Latest availability</h2>
     <p class="hint">Expected input latency = product delivery timeliness minus 1 day (not a provider SLA). Monthly-only dates remain excluded from numeric latency. Publication dates refer to the selected latest input: CDSE publication or PAL portal archival time; hover for the source. Not reported means no publication timestamp is exposed by the adapter. Catalogue modification and download times are not publication dates.</p>
     <table>
-      <thead><tr><th>Product</th><th>Input</th><th>Status</th><th>Latest available</th><th>Publication date</th><th>Latency</th><th>Expected</th><th>Files</th></tr></thead>
+      <thead><tr><th>Product</th><th>Input</th><th>Status</th><th>Latest available</th><th>Publication date</th><th>Production date</th><th>Catalogue timestamp</th><th>Latency</th><th>Expected</th><th>Files</th></tr></thead>
       <tbody>
     """ + "\n".join(body) + "</tbody></table>"
 
@@ -200,6 +202,8 @@ def render_availability_matrix(rows: list[dict], *, cadence: str, title: str, de
         "error": "!",
         "unknown": "?",
         "not_applicable": "—",
+        "inferred_unavailable": "≈",
+        "not_due": "◷",
     }
 
     def cell(row: dict | None) -> str:
@@ -226,7 +230,7 @@ def render_availability_matrix(rows: list[dict], *, cadence: str, title: str, de
 
     return f"""
     <h2>{escape(title)}</h2>
-    <p class="hint">{escape(description)} Latest evidence is reused; older periods are checked search-only or with tiny provider probes where required. ✓ present · × missing or newer than latest available · ! provider/query error · ? not checked.</p>
+    <p class="hint">{escape(description)} Latest evidence is reused; older periods are checked search-only or with tiny provider probes where required. ✓ present · × no matching data in provider query · ≈ inferred unavailable, not individually checked · ◷ current month incomplete · ! provider/query error · ? not checked.</p>
     <table class="weekly-table">
       <thead><tr><th>Product</th><th>Input</th>{head}</tr></thead>
       <tbody>{''.join(body)}</tbody>
@@ -369,6 +373,7 @@ td.weekly {{ text-align:center; font-weight:800; font-size:16px; }}
 td.weekly.present {{ background:var(--ok); color:#15803d; }}
 td.weekly.missing {{ background:var(--bad); color:#b91c1c; }}
 td.weekly.error {{ background:var(--warn); color:#b45309; }}
+td.weekly.inferred_unavailable, td.weekly.not_due {{ background:#f1f5f9; color:#64748b; }}
 td.weekly.unknown {{ background:#f1f5f9; color:#64748b; }}
 td.weekly.not_applicable {{ background:#f8fafc; color:#94a3b8; }}
 a {{ color:#1d4ed8; }}

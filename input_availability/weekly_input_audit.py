@@ -484,8 +484,8 @@ def daily_rows(latest_rows: list[dict], run_at: str, audit) -> list[dict]:
             files = "0"
             source = "weekly_probe"
             notes = ""
-            if latest_day and day > latest_day:
-                status, source = "missing", "inferred_from_latest"
+            if latest.get("found") == "yes" and latest_day and day > latest_day:
+                status, source = "inferred_unavailable", "inferred_from_latest"
                 notes = f"latest available is {latest_day.isoformat()}"
             elif latest_day and day == latest_day and latest.get("found") == "yes":
                 status, files, source = "present", latest.get("files_found") or "1", "latest_audit"
@@ -531,8 +531,10 @@ def monthly_rows(latest_rows: list[dict], run_at: str, audit) -> list[dict]:
             files = "0"
             source = "monthly_probe"
             notes = ""
-            if latest_month and month_start > latest_month:
-                status, source = "missing", "inferred_from_latest"
+            if month_start == dt.date.fromisoformat(run_at[:10]).replace(day=1):
+                status, source, notes = "not_due", "calendar", "Current month is incomplete; full monthly coverage is not yet due"
+            elif latest.get("found") == "yes" and latest_month and month_start > latest_month:
+                status, source = "inferred_unavailable", "inferred_from_latest"
                 notes = f"latest available month is {latest_month.strftime('%Y-%m')}"
             elif latest_month and month_start == latest_month and latest.get("found") == "yes":
                 status, files, source = "present", latest.get("files_found") or "1", "latest_audit"
